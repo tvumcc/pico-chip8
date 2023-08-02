@@ -8,7 +8,12 @@ include(lib/pico-sdk/pico_sdk_init.cmake)
 project(pico_chip8 C CXX ASM)
 pico_sdk_init()
 
-add_executable(${PROJECT_NAME} src/main.c)
+add_executable(${PROJECT_NAME} 
+	src/main.c
+	src/chip-8/display.c
+	src/chip-8/opcodes.c
+	src/chip-8/chip8.c
+)
 
 pico_enable_stdio_uart(${PROJECT_NAME} 1)
 pico_enable_stdio_usb(${PROJECT_NAME} 0)
