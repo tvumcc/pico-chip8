@@ -9,6 +9,7 @@
 
 typedef struct Display {
     unsigned char pixelArray[CHIP8_HEIGHT][CHIP8_WIDTH];
+	unsigned char prev_buffer[CHIP8_HEIGHT][CHIP8_WIDTH];
 } Display;
 
 // Initialize the display array and texture

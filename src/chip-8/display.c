@@ -14,11 +14,14 @@ Display display_init() {
 void display_draw(Display* display) {
 	for (int y = 0; y < CHIP8_HEIGHT; y++) {
 		for (int x = 0; x < CHIP8_WIDTH; x++) {
-			if (display->pixelArray[y][x] == 0xFF) {
-				fillRect(x*2, y*2, 2, 2, ST7735_WHITE);
-			} else {
-				fillRect(x*2, y*2, 2, 2, ST7735_BLACK);
+			if (display->prev_buffer[y][x] != display->pixelArray[y][x]) {
+				if (display->pixelArray[y][x] == 0xFF) {
+					fillRect(x*2, y*2, 2, 2, ST7735_WHITE);
+				} else {
+					fillRect(x*2, y*2, 2, 2, ST7735_BLACK);
+				}
 			}
+			display->prev_buffer[y][x] = display->pixelArray[y][x];
 		}
 	}
 }   
@@ -38,7 +41,8 @@ void display_clear(Display* display) {
 	for (int y = 0; y < CHIP8_HEIGHT; y++) {
 		for (int x = 0; x < CHIP8_WIDTH; x++) {
 			display->pixelArray[y][x] = 0x00;
+			display->prev_buffer[y][x] = 0x00;
 		}
 	}
-	fillScreen(ST7735_BLACK);
+	fillRect(0, 0, 128, 64, ST7735_BLACK);
 }
