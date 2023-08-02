@@ -15,9 +15,9 @@ void display_draw(Display* display) {
 	for (int y = 0; y < CHIP8_HEIGHT; y++) {
 		for (int x = 0; x < CHIP8_WIDTH; x++) {
 			if (display->pixelArray[y][x] == 0xFF) {
-				drawPixel(x, y, ST7735_WHITE);
+				fillRect(x*2, y*2, 2, 2, ST7735_WHITE);
 			} else {
-				drawPixel(x, y, ST7735_BLACK);
+				fillRect(x*2, y*2, 2, 2, ST7735_BLACK);
 			}
 		}
 	}
