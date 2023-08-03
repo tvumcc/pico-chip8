@@ -69,8 +69,6 @@ void tick(CHIP8* chip8, Display* display) {
 	if (chip8->delay_timer > 0)
 		chip8->delay_timer--;
 	
-	// TODO: Process Input
-	
 	unsigned short instruction = fetch_instruction(chip8);
 	decode_and_execute(chip8, display, instruction);
 }
