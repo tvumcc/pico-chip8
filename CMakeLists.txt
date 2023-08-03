@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_EXPORT_COMPILE_COMMANDS)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(PICO_PATH_SDK "lib/pico-sdk")
 include(lib/pico-sdk/pico_sdk_init.cmake)
@@ -10,6 +10,7 @@ pico_sdk_init()
 
 add_executable(${PROJECT_NAME} 
 	src/main.c
+	src/roms.c
 	src/chip-8/display.c
 	src/chip-8/opcodes.c
 	src/chip-8/chip8.c
