@@ -38,21 +38,21 @@ int main() {
 	TFT_BlackTab_Initialize();
 	fillScreen(ST7735_BLACK); 
 
-	// unsigned int last_frame = to_ms_since_boot(get_absolute_time());
-	// unsigned int clock_speed = 1;
+	unsigned int last_frame = to_ms_since_boot(get_absolute_time());
+	unsigned int clock_speed = 1;
 
-	// Seed the random number generator at the start time of the program
 	srand((unsigned int)to_ms_since_boot(get_absolute_time())); 
 
 	Display display = display_init();
 	CHIP8 chip8 = chip8_init(octojam2_program, sizeof(octojam2_program));
+
 	// Keep program running
 	while (1) {
-		//unsigned int current_time = to_ms_since_boot(get_absolute_time());
-		//if (current_time > last_frame + clock_speed) {
+		unsigned int current_time = to_ms_since_boot(get_absolute_time());
+		if (current_time > last_frame + clock_speed) {
 			tick(&chip8, &display);
-			//last_frame = current_time;
-		//}
+			last_frame = current_time;
+		}
 	}
 	return 0;
 }
