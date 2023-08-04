@@ -37,9 +37,35 @@
 #define STATE_ROM_SELECT 1
 #define STATE_GAME 2
 
+typedef enum System {
+	CHIP_8,
+	SuperCHIP_8,
+	XO_CHIP,
+} System;
 
-void go_to_home();
+typedef struct Program {
+	char name[20];
+	unsigned char* data;
+	size_t size;
+} Program;
+
+void home_goto();
+void home_process_buttons(uint8_t* state, uint8_t* selection, uint8_t* rom_selection, System* system, unsigned int up, unsigned int down, unsigned int enter);
+void rom_select_goto(System system);
+void rom_select_process_buttons(System system, uint8_t* state, uint8_t* rom_selection, unsigned int up, unsigned int down, unsigned int enter);
 void process_buttons(unsigned char* out, uint8_t* keys);
+
+Program chip8_roms[] = {
+	{"IBM Logo", ibm_program, sizeof(ibm_program)},
+	{"Octojam2", octojam2_program, sizeof(octojam2_program)},
+	{"Flightrunner", flightrunner_program, sizeof(flightrunner_program)},
+	{"Snek", snek_program, sizeof(snek_program)},
+	{"Br8kout", breakout_program, sizeof(breakout_program)},
+	{"Pet Dog", petdog_program, sizeof(petdog_program)},
+};
+
+Display display;
+CHIP8 chip8;
 
 int main() {
 	uint8_t keys[16] = {0};
@@ -59,9 +85,6 @@ int main() {
 	gpio_set_dir(KEY_RESET, GPIO_IN);
 	gpio_pull_down(KEY_RESET);
 
-	gpio_init(25);
-	gpio_set_dir(25, GPIO_OUT);
-
 	tft_height = (uint8_t)131;
 	tft_width = (uint8_t)130;
 
@@ -77,29 +100,23 @@ int main() {
 
 	unsigned int last_frame = to_ms_since_boot(get_absolute_time());
 	unsigned int clock_speed = 1;
-
 	srand(last_frame); 
 
-	Display display = display_init();
-	CHIP8 chip8 = chip8_init(flightrunner_program, sizeof(flightrunner_program));
-
-	uint8_t state = STATE_GAME;
+	uint8_t state = STATE_HOME;
 	uint8_t home_screen_selection = 0;
-	unsigned int debounce_timer = to_ms_since_boot(get_absolute_time());
-	unsigned int debounce = 250;
+	uint8_t rom_selection = 0;
+	System system = CHIP_8;
+
+	home_goto();
 
 	// Keep program running
 	while (1) {
 		// Reset logic
-		gpio_put(25, gpio_get(KEY_RESET));
 		if (gpio_get(KEY_RESET)) {
 			if (gpio_get(KEY_7) && state != STATE_HOME) { // DOWN
 				state = STATE_HOME;
-				go_to_home();
-			} else if (gpio_get(KEY_5) && state != STATE_GAME) { // UP
-				state = STATE_GAME;
-				chip8 = chip8_init(flightrunner_program, sizeof(flightrunner_program));
-				display = display_init();
+				home_goto();
+				home_screen_selection = 0;
 			}
 		} else {
 			if (state == STATE_GAME) {
@@ -110,24 +127,16 @@ int main() {
 					last_frame = current_time;
 				}
 			} else if (state == STATE_HOME) {
-				if (gpio_get(KEY_5) && (to_ms_since_boot(get_absolute_time()) > debounce_timer + debounce)) {
-					fillRect(20, 40 + (home_screen_selection) * 10, 5, 7, ST7735_BLACK);
-					home_screen_selection = home_screen_selection == 0 ? 2 : home_screen_selection - 1;
-					drawChar(20, 40 + (home_screen_selection) * 10, '>', ST7735_WHITE, ST7735_BLACK, 1);
-					debounce_timer = to_ms_since_boot(get_absolute_time());
-				} else if (gpio_get(KEY_8) && (to_ms_since_boot(get_absolute_time()) > debounce_timer + debounce)) {
-					fillRect(20, 40 + (home_screen_selection) * 10, 5, 7, ST7735_BLACK);
-					home_screen_selection = (home_screen_selection + 1) % 3;
-					drawChar(20, 40 + (home_screen_selection) * 10, '>', ST7735_WHITE, ST7735_BLACK, 1);
-					debounce_timer = to_ms_since_boot(get_absolute_time());
-				}
+				home_process_buttons(&state, &home_screen_selection, &rom_selection, &system, KEY_5, KEY_8, KEY_9);
+			} else if (state == STATE_ROM_SELECT) {
+				rom_select_process_buttons(system, &state, &rom_selection, KEY_5, KEY_8, KEY_9);
 			}
 		}
 	}
 	return 0;
 }
 
-void go_to_home() {
+void home_goto() {
 	fillScreen(ST7735_BLACK);
 	drawText(3, 4, "PicoCHIP-8", ST7735_WHITE, ST7735_BLACK, 2);
 	drawText(16, 20, "written by piigle", ST7735_WHITE, ST7735_BLACK, 1);
@@ -135,6 +144,84 @@ void go_to_home() {
 	drawText(32, 50, "Super CHIP-8", ST7735_WHITE, ST7735_BLACK, 1);
 	drawText(32, 60, "XO-CHIP", ST7735_WHITE, ST7735_BLACK, 1);
 	drawChar(20, 40, '>', ST7735_WHITE, ST7735_BLACK, 1);
+}
+
+void home_process_buttons(uint8_t* state, uint8_t* selection, uint8_t* rom_selection, System* system, unsigned int up, unsigned int down, unsigned int enter) {
+	static unsigned int debounce_timer = 0;
+	static unsigned int debounce = 250;
+
+	// Move cursor up
+	if (gpio_get(up) && (to_ms_since_boot(get_absolute_time()) > debounce_timer + debounce)) {
+		fillRect(20, 40 + (*selection) * 10, 5, 7, ST7735_BLACK);
+		*selection = *selection == 0 ? 2 : *selection- 1;
+		drawChar(20, 40 + (*selection) * 10, '>', ST7735_WHITE, ST7735_BLACK, 1);
+		debounce_timer = to_ms_since_boot(get_absolute_time());
+	// Move cursor down
+	} else if (gpio_get(down) && (to_ms_since_boot(get_absolute_time()) > debounce_timer + debounce)) {
+		fillRect(20, 40 + (*selection) * 10, 5, 7, ST7735_BLACK);
+		*selection = (*selection + 1) % 3;
+		drawChar(20, 40 + (*selection) * 10, '>', ST7735_WHITE, ST7735_BLACK, 1);
+		debounce_timer = to_ms_since_boot(get_absolute_time());
+	// Select
+	} else if (gpio_get(enter)) {
+		*state = STATE_ROM_SELECT;
+		*system = *selection;
+		*rom_selection = 0;
+		rom_select_goto(*selection);
+	}
+}
+
+void rom_select_goto(System system) {
+	fillScreen(ST7735_BLACK);
+	switch (system) {
+		case CHIP_8:
+			drawText(3, 4, "CHIP-8", ST7735_WHITE, ST7735_BLACK, 2);
+			for (int i = 0; i < sizeof(chip8_roms) / sizeof(Program); i++) {
+				drawText(32, 30 + (10 * i), chip8_roms[i].name, ST7735_WHITE, ST7735_BLACK, 1);
+			}
+			drawChar(20, 30, '>', ST7735_WHITE, ST7735_BLACK, 1);
+			break;
+		case SuperCHIP_8:
+			drawText(3, 4, "SuperCH8", ST7735_WHITE, ST7735_BLACK, 2);
+			drawText(16, 20, "Coming Soon!", ST7735_WHITE, ST7735_BLACK, 1);
+			break;
+		case XO_CHIP:
+			drawText(3, 4, "XO-CHIP", ST7735_WHITE, ST7735_BLACK, 2);
+			drawText(16, 20, "Coming Soon!", ST7735_WHITE, ST7735_BLACK, 1);
+			break;
+	}
+	sleep_ms(500);
+}
+
+void rom_select_process_buttons(System system, uint8_t* state, uint8_t* rom_selection, unsigned int up, unsigned int down, unsigned int enter) {
+	static unsigned int debounce_timer = 0;
+	static unsigned int debounce = 250;
+	if (debounce_timer == 0) debounce_timer = to_ms_since_boot(get_absolute_time());
+
+	switch (system) {
+		case CHIP_8:
+			// Move cursor up
+			if (gpio_get(up) && (to_ms_since_boot(get_absolute_time()) > debounce_timer + debounce)) {
+				fillRect(20, 30 + (*rom_selection) * 10, 5, 7, ST7735_BLACK);
+				*rom_selection = *rom_selection == 0 ? ((sizeof(chip8_roms) / sizeof(Program))-1) : *rom_selection - 1;
+				drawChar(20, 30 + (*rom_selection) * 10, '>', ST7735_WHITE, ST7735_BLACK, 1);
+				debounce_timer = to_ms_since_boot(get_absolute_time());
+			// Move cursor down
+			} else if (gpio_get(down) && (to_ms_since_boot(get_absolute_time()) > debounce_timer + debounce)) {
+				fillRect(20, 30 + (*rom_selection) * 10, 5, 7, ST7735_BLACK);
+				*rom_selection = (*rom_selection + 1) % (sizeof(chip8_roms) / sizeof(Program));
+				drawChar(20, 30 + (*rom_selection) * 10, '>', ST7735_WHITE, ST7735_BLACK, 1);
+				debounce_timer = to_ms_since_boot(get_absolute_time());
+			// Select
+			} else if (gpio_get(enter) && (to_ms_since_boot(get_absolute_time()) > debounce_timer + debounce)) {
+				*state = STATE_GAME;
+				display = display_init();
+				chip8 = chip8_init(chip8_roms[*rom_selection].data, chip8_roms[*rom_selection].size);
+				debounce_timer = to_ms_since_boot(get_absolute_time());
+			}
+			break;
+	}
+
 }
 
 void process_buttons(unsigned char* out, uint8_t* keys) {
