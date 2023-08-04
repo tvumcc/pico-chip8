@@ -7,6 +7,7 @@
 
 Display display_init() {
     Display display;
+	fillScreen(ST7735_BLACK);
 	display_clear(&display);
     return display;
 }
@@ -44,5 +45,5 @@ void display_clear(Display* display) {
 			display->prev_buffer[y][x] = 0x00;
 		}
 	}
-	fillRect(0, 32, 128, 64, ST7735_BLACK);
+	fillRect(0, 32, 130, 64, ST7735_BLACK);
 }
