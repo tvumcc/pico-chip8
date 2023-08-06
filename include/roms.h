@@ -4,3 +4,7 @@ extern unsigned char flightrunner_program[295];
 extern unsigned char snek_program[65];
 extern unsigned char breakout_program[280];
 extern unsigned char petdog_program[1869];
+extern unsigned char merlin_program[345];
+extern unsigned char tank_program[224];
+extern unsigned char tetris_program[494];
+extern unsigned char pong_program[246];

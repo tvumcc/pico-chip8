@@ -38,6 +38,8 @@
 #define STATE_ROM_SELECT 1
 #define STATE_GAME 2
 
+#define min(a, b) (((a) < (b)) ? (a) : (b))
+
 typedef enum System {
 	CHIP_8,
 	SuperCHIP_8,
@@ -45,7 +47,7 @@ typedef enum System {
 } System;
 
 typedef struct Program {
-	char name[20];
+	char name[14];
 	unsigned char* data;
 	size_t size;
 } Program;
@@ -58,6 +60,7 @@ typedef struct PicoCHIP8 {
 	// Menu Stuff
 	uint8_t system_selection;
 	uint8_t rom_selection;
+	uint8_t page;
 } PicoCHIP8;
 
 void home_goto(PicoCHIP8* device);
@@ -71,8 +74,12 @@ Program chip8_roms[] = {
 	{"Octojam2", octojam2_program, sizeof(octojam2_program)},
 	{"Flightrunner", flightrunner_program, sizeof(flightrunner_program)},
 	{"Snek", snek_program, sizeof(snek_program)},
-	{"Br8kout", breakout_program, sizeof(breakout_program)},
+	{"Breakout", breakout_program, sizeof(breakout_program)},
 	{"Pet Dog", petdog_program, sizeof(petdog_program)},
+	{"Merlin", merlin_program, sizeof(merlin_program)},
+	{"Tank", tank_program, sizeof(tank_program)},
+	{"Tetris", tetris_program, sizeof(tetris_program)},
+	{"Pong", pong_program, sizeof(pong_program)},
 };
 
 Display display;
@@ -114,6 +121,7 @@ int main() {
 	device.state = STATE_HOME;
 	device.system_selection = 0;
 	device.rom_selection = 0;
+	device.page = 0;
 	device.system = CHIP_8;
 	home_goto(&device);
 
@@ -173,7 +181,10 @@ void home_process_buttons(PicoCHIP8* device) {
 	} else if (device->key_state[9]) {
 		device->state = STATE_ROM_SELECT;
 		device->system = device->system_selection;
+		device->rom_selection = 0;
+		device->page = 0;
 		rom_select_goto(device);
+		sleep_ms(500); // Prevents from instantly running the first rom if you don't immediately let go of the button
 	}
 }
 
@@ -182,10 +193,10 @@ void rom_select_goto(PicoCHIP8* device) {
 	switch (device->system) {
 		case CHIP_8:
 			drawText(3, 4, "CHIP-8", ST7735_WHITE, ST7735_BLACK, 2);
-			for (int i = 0; i < sizeof(chip8_roms) / sizeof(Program); i++) {
-				drawText(32, 30 + (10 * i), chip8_roms[i].name, ST7735_WHITE, ST7735_BLACK, 1);
+			for (int i = device->page * 8; i < min(sizeof(chip8_roms) / sizeof(Program), (device->page+1) * 8); i++) {
+				drawText(32, 30 + (10 * (i % 8)), chip8_roms[i].name, ST7735_WHITE, ST7735_BLACK, 1);
 			}
-			drawChar(20, 30, '>', ST7735_WHITE, ST7735_BLACK, 1);
+			drawChar(20, 30 + (10 * (device->rom_selection % 8)), '>', ST7735_WHITE, ST7735_BLACK, 1);
 			break;
 		case SuperCHIP_8:
 			drawText(3, 4, "SuperCH8", ST7735_WHITE, ST7735_BLACK, 2);
@@ -196,9 +207,6 @@ void rom_select_goto(PicoCHIP8* device) {
 			drawText(16, 20, "Coming Soon!", ST7735_WHITE, ST7735_BLACK, 1);
 			break;
 	}
-
-	device->rom_selection = 0;
-	sleep_ms(500); // Prevents from instantly running the first rom if you don't immediately let go of the button
 }
 
 void rom_select_process_buttons(PicoCHIP8* device) {
@@ -210,15 +218,23 @@ void rom_select_process_buttons(PicoCHIP8* device) {
 		case CHIP_8:
 			// Move cursor up
 			if (device->key_state[5] && (to_ms_since_boot(get_absolute_time()) > debounce_timer + debounce)) {
-				fillRect(20, 30 + device->rom_selection * 10, 5, 7, ST7735_BLACK);
+				fillRect(20, 30 + (device->rom_selection % 8) * 10, 5, 7, ST7735_BLACK);
 				device->rom_selection = device->rom_selection == 0 ? ((sizeof(chip8_roms) / sizeof(Program))-1) : device->rom_selection - 1;
-				drawChar(20, 30 + device->rom_selection * 10, '>', ST7735_WHITE, ST7735_BLACK, 1);
+				if (device->rom_selection / 8 != device->page) {
+					device->page = device->rom_selection / 8;
+					rom_select_goto(device);
+				}
+				drawChar(20, 30 + (device->rom_selection % 8) * 10, '>', ST7735_WHITE, ST7735_BLACK, 1);
 				debounce_timer = to_ms_since_boot(get_absolute_time());
 			// Move cursor down
 			} else if (device->key_state[8] && (to_ms_since_boot(get_absolute_time()) > debounce_timer + debounce)) {
-				fillRect(20, 30 + device->rom_selection * 10, 5, 7, ST7735_BLACK);
+				fillRect(20, 30 + (device->rom_selection % 8) * 10, 5, 7, ST7735_BLACK);
 				device->rom_selection = (device->rom_selection + 1) % (sizeof(chip8_roms) / sizeof(Program));
-				drawChar(20, 30 + device->rom_selection * 10, '>', ST7735_WHITE, ST7735_BLACK, 1);
+				if (device->rom_selection / 8 != device->page) {
+					device->page = device->rom_selection / 8;
+					rom_select_goto(device);
+				}
+				drawChar(20, 30 + (device->rom_selection % 8) * 10, '>', ST7735_WHITE, ST7735_BLACK, 1);
 				debounce_timer = to_ms_since_boot(get_absolute_time());
 			// Select
 			} else if (device->key_state[9] && (to_ms_since_boot(get_absolute_time()) > debounce_timer + debounce)) {
