@@ -1,5 +1,18 @@
 #include "roms.h"
 
+extern Program chip8_roms[10] = {
+	{"IBM Logo", ibm_program, sizeof(ibm_program)},
+	{"Octojam2", octojam2_program, sizeof(octojam2_program)},
+	{"Flightrunner", flightrunner_program, sizeof(flightrunner_program)},
+	{"Snek", snek_program, sizeof(snek_program)},
+	{"Breakout", breakout_program, sizeof(breakout_program)},
+	{"Pet Dog", petdog_program, sizeof(petdog_program)},
+	{"Merlin", merlin_program, sizeof(merlin_program)},
+	{"Tank", tank_program, sizeof(tank_program)},
+	{"Tetris", tetris_program, sizeof(tetris_program)},
+	{"Pong", pong_program, sizeof(pong_program)},
+};
+
 unsigned char ibm_program[132] = {
 	0000, 0xe0, 0xa2, 0x2a, 0x60, 0x0c, 0x61, 0x08, 0xd0, 0x1f, 
 	0x70, 0x09, 0xa2, 0x39, 0xd0, 0x1f, 0xa2, 0x48, 0x70, 0x08, 

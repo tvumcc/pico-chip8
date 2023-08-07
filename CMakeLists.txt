@@ -11,6 +11,7 @@ pico_sdk_init()
 add_executable(${PROJECT_NAME} 
 	src/main.c
 	src/roms.c
+	src/device.c
 	src/chip-8/display.c
 	src/chip-8/opcodes.c
 	src/chip-8/chip8.c
