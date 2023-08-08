@@ -30,20 +30,21 @@
 #define SHIFT_CLK 21
 #define SHIFT_IN 22
 
+void process_buttons(unsigned char* out);
+
 int main() {
-	uint8_t keys[16] = {0};
-	keys[5] = KEY_5;
-	keys[7] = KEY_7;
-	keys[9] = KEY_9;
-	keys[8] = KEY_8;
-	keys[16] = KEY_RESET;
-	for (int i = 0; i < 16; i++) {
-		if (keys[i] != 0) {
-			gpio_init(keys[i]);
-			gpio_set_dir(keys[i], GPIO_IN);
-			gpio_pull_down(keys[i]);
-		}
-	}
+	gpio_init(KEY_RESET);
+	gpio_set_dir(KEY_RESET, GPIO_IN);
+	gpio_pull_down(KEY_RESET);
+
+	gpio_init(SHIFT_LOAD);
+	gpio_set_dir(SHIFT_LOAD, GPIO_OUT);
+	gpio_put(SHIFT_LOAD, 1);
+	gpio_init(SHIFT_CLK);
+	gpio_set_dir(SHIFT_CLK, GPIO_OUT);
+	gpio_put(SHIFT_CLK, 0);
+	gpio_init(SHIFT_IN);
+	gpio_set_dir(SHIFT_IN, GPIO_IN);
 
 	// Display Stuff
 	tft_height = (uint8_t)131;
@@ -71,7 +72,7 @@ int main() {
 	home_goto(&device);
 
 	while (true) {
-		process_buttons(device.key_state, keys);
+		process_buttons(device.key_state);
 
 		if (device.key_state[16]) {
 			if (device.key_state[7] && device.state != STATE_HOME) {
@@ -95,10 +96,20 @@ int main() {
 }
 
 
-void process_buttons(unsigned char* out, uint8_t* keys) {
-	for (int i = 0; i < 18; i++) {
-		if (keys[i] != 0) {
-			out[i] = gpio_get(keys[i]);
-		}
+void process_buttons(unsigned char* out) {
+	sleep_ms(100);
+	gpio_put(SHIFT_LOAD, 1);
+	out[16] = gpio_get(KEY_RESET);
+	char keys[17] = "";
+	for (int i = 0; i < 16; i++) {
+		out[i] = gpio_get(SHIFT_IN);
+		keys[i] = out[i];
+		gpio_put(SHIFT_CLK, 1);		
+		sleep_us(1);
+		gpio_put(SHIFT_CLK, 0);
+		sleep_us(1);
 	}
+	drawText(20, 80, keys, ST7735_WHITE, ST7735_BLACK, 1);
+	keys[16] = '\0';
+	gpio_put(SHIFT_LOAD, 0);
 }

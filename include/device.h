@@ -5,14 +5,12 @@
 #include "chip-8/chip8.h"
 #include "system.h"
 
-// Each button will be mapped to a single GPIO pin for now
-// In the future, shift registers will be used
 #define KEY_5 20 // UP
 #define KEY_7 18 // LEFT
 #define KEY_9 21 // RIGHT
 #define KEY_8 19 // DOWN
-#define KEY_RESET 2
-#define KEY_SELECT 3
+
+#define KEY_RESET 2 // Reset button is at GPIO pin 2
 
 #define STATE_HOME 0
 #define STATE_ROM_SELECT 1
@@ -36,6 +34,5 @@ void home_goto(PicoCHIP8* device);
 void home_process_buttons(PicoCHIP8* device);
 void rom_select_goto(PicoCHIP8* device);
 void rom_select_process_buttons(PicoCHIP8* device);
-void process_buttons(unsigned char* out, uint8_t* keys);
 
 #endif
