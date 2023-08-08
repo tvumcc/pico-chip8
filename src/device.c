@@ -26,19 +26,19 @@ void home_process_buttons(PicoCHIP8* device) {
 	static unsigned int debounce = 250;
 
 	// Move cursor up
-	if (device->key_state[5] && (to_ms_since_boot(get_absolute_time()) > debounce_timer + debounce)) {
+	if (device->key_state[KEY_5] && (to_ms_since_boot(get_absolute_time()) > debounce_timer + debounce)) {
 		fillRect(20, 40 + device->system_selection * 10, 5, 7, ST7735_BLACK);
 		device->system_selection = device->system_selection == 0 ? 2 : device->system_selection - 1;
 		drawChar(20, 40 + device->system_selection * 10, '>', ST7735_WHITE, ST7735_BLACK, 1);
 		debounce_timer = to_ms_since_boot(get_absolute_time());
 	// Move cursor down
-	} else if (device->key_state[8] && (to_ms_since_boot(get_absolute_time()) > debounce_timer + debounce)) {
+	} else if (device->key_state[KEY_8] && (to_ms_since_boot(get_absolute_time()) > debounce_timer + debounce)) {
 		fillRect(20, 40 + device->system_selection * 10, 5, 7, ST7735_BLACK);
 		device->system_selection = (device->system_selection + 1) % 3;
 		drawChar(20, 40 + device->system_selection * 10, '>', ST7735_WHITE, ST7735_BLACK, 1);
 		debounce_timer = to_ms_since_boot(get_absolute_time());
 	// Select
-	} else if (device->key_state[9]) {
+	} else if (device->key_state[KEY_9]) {
 		device->state = STATE_ROM_SELECT;
 		device->system = device->system_selection;
 		device->rom_selection = 0;
@@ -77,7 +77,7 @@ void rom_select_process_buttons(PicoCHIP8* device) {
 	switch (device->system) {
 		case CHIP_8:
 			// Move cursor up
-			if (device->key_state[5] && (to_ms_since_boot(get_absolute_time()) > debounce_timer + debounce)) {
+			if (device->key_state[KEY_5] && (to_ms_since_boot(get_absolute_time()) > debounce_timer + debounce)) {
 				fillRect(20, 30 + (device->rom_selection % 8) * 10, 5, 7, ST7735_BLACK);
 				device->rom_selection = device->rom_selection == 0 ? ((sizeof(chip8_roms) / sizeof(Program))-1) : device->rom_selection - 1;
 				if (device->rom_selection / 8 != device->page) {
@@ -87,7 +87,7 @@ void rom_select_process_buttons(PicoCHIP8* device) {
 				drawChar(20, 30 + (device->rom_selection % 8) * 10, '>', ST7735_WHITE, ST7735_BLACK, 1);
 				debounce_timer = to_ms_since_boot(get_absolute_time());
 			// Move cursor down
-			} else if (device->key_state[8] && (to_ms_since_boot(get_absolute_time()) > debounce_timer + debounce)) {
+			} else if (device->key_state[KEY_8] && (to_ms_since_boot(get_absolute_time()) > debounce_timer + debounce)) {
 				fillRect(20, 30 + (device->rom_selection % 8) * 10, 5, 7, ST7735_BLACK);
 				device->rom_selection = (device->rom_selection + 1) % (sizeof(chip8_roms) / sizeof(Program));
 				if (device->rom_selection / 8 != device->page) {
@@ -97,7 +97,7 @@ void rom_select_process_buttons(PicoCHIP8* device) {
 				drawChar(20, 30 + (device->rom_selection % 8) * 10, '>', ST7735_WHITE, ST7735_BLACK, 1);
 				debounce_timer = to_ms_since_boot(get_absolute_time());
 			// Select
-			} else if (device->key_state[9] && (to_ms_since_boot(get_absolute_time()) > debounce_timer + debounce)) {
+			} else if (device->key_state[KEY_9] && (to_ms_since_boot(get_absolute_time()) > debounce_timer + debounce)) {
 				device->state = STATE_GAME;
 				display = display_init();
 				chip8 = chip8_init(chip8_roms[device->rom_selection].data, chip8_roms[device->rom_selection].size);

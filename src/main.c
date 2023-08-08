@@ -74,8 +74,8 @@ int main() {
 	while (true) {
 		process_buttons(device.key_state);
 
-		if (device.key_state[16]) {
-			if (device.key_state[7] && device.state != STATE_HOME) {
+		if (device.key_state[KEY_RESET]) {
+			if (device.key_state[KEY_1] && device.state != STATE_HOME) {
 				home_goto(&device);
 			}
 		} else {
@@ -97,19 +97,14 @@ int main() {
 
 
 void process_buttons(unsigned char* out) {
-	sleep_ms(100);
 	gpio_put(SHIFT_LOAD, 1);
-	out[16] = gpio_get(KEY_RESET);
-	char keys[17] = "";
 	for (int i = 0; i < 16; i++) {
 		out[i] = gpio_get(SHIFT_IN);
-		keys[i] = out[i];
 		gpio_put(SHIFT_CLK, 1);		
 		sleep_us(1);
 		gpio_put(SHIFT_CLK, 0);
 		sleep_us(1);
 	}
-	drawText(20, 80, keys, ST7735_WHITE, ST7735_BLACK, 1);
-	keys[16] = '\0';
+	out[16] = (unsigned char)gpio_get(2);
 	gpio_put(SHIFT_LOAD, 0);
 }

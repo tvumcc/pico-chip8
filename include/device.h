@@ -5,12 +5,27 @@
 #include "chip-8/chip8.h"
 #include "system.h"
 
-#define KEY_5 20 // UP
-#define KEY_7 18 // LEFT
-#define KEY_9 21 // RIGHT
-#define KEY_8 19 // DOWN
-
-#define KEY_RESET 2 // Reset button is at GPIO pin 2
+// Row 1
+#define KEY_1 0
+#define KEY_2 1
+#define KEY_3 2
+#define KEY_C 3
+// Row 2
+#define KEY_4 4
+#define KEY_5 5
+#define KEY_6 6
+#define KEY_D 7
+// Row 3
+#define KEY_7 8
+#define KEY_8 9
+#define KEY_9 10
+#define KEY_E 11
+// Row 4
+#define KEY_A 12
+#define KEY_0 13
+#define KEY_B 14
+#define KEY_F 15
+#define KEY_RESET 16  // Reset button is at GPIO pin 2
 
 #define STATE_HOME 0
 #define STATE_ROM_SELECT 1
