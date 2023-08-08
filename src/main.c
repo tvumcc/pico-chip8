@@ -70,6 +70,8 @@ int main() {
 	device.page = 0;
 	device.system = CHIP_8;
 	home_goto(&device);
+	
+	int keys[16] = {KEY_0, KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9, KEY_A, KEY_B, KEY_C, KEY_D, KEY_E, KEY_F};
 
 	while (true) {
 		process_buttons(device.key_state);
@@ -82,7 +84,7 @@ int main() {
 			if (device.state == STATE_GAME) {
 				unsigned int current_time = to_ms_since_boot(get_absolute_time());
 				if (current_time > last_frame + clock_speed) {
-					for (int i = 0; i < 16; i++) chip8.keys[i] = device.key_state[i];
+					for (int i = 0; i < 16; i++) chip8.keys[i] = device.key_state[keys[i]];
 					tick(&chip8, &display);
 					last_frame = current_time;
 				}
