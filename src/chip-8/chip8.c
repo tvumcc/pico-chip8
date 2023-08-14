@@ -5,7 +5,7 @@
 #include "pico/stdlib.h"
 
 #include "chip-8/chip8.h"
-#include "chip-8/opcodes.h"
+#include "chip-8/chip8_opcodes.h"
 
 CHIP8 chip8_init(unsigned char* program, size_t program_size) {
 	CHIP8 chip8;

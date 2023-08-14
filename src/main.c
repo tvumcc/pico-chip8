@@ -5,11 +5,14 @@
 #include "hw.h"
 #include "ST7735_TFT.h"
 
-#include "chip-8/display.h"
 #include "chip-8/chip8.h"
+#include "super-chip-8/schip8.h"
+#include "xo-chip/xochip.h"
+
 #include "roms.h"
 #include "system.h"
 #include "device.h"
+#include "display.h"
 
 // The following are exact redefinitions that are already defined in the pico-st7735 CMakeLists.txt
 // If the hardware configuration needs to be changed, these can be overriden

@@ -12,9 +12,16 @@ add_executable(${PROJECT_NAME}
 	src/main.c
 	src/roms.c
 	src/device.c
-	src/chip-8/display.c
-	src/chip-8/opcodes.c
+	src/display.c
+
 	src/chip-8/chip8.c
+	src/chip-8/chip8_opcodes.c
+
+	src/super-chip-8/schip8.c
+	src/super-chip-8/schip8_opcodes.c
+
+	src/xo-chip/xochip.c
+	src/xo-chip/xochip_opcodes.c
 )
 
 pico_enable_stdio_uart(${PROJECT_NAME} 1)

@@ -1,5 +1,5 @@
-#ifndef OPCODES_H
-#define OPCODES_H
+#ifndef CHIP8_OPCODES_H
+#define CHIP8_OPCODES_H
 #include <stdint.h>
 
 #include "display.h"
