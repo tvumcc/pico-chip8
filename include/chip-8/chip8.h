@@ -28,9 +28,6 @@ typedef struct CHIP8 {
 // Initialize a CHIP8 struct
 CHIP8 chip8_init(u8* program, size_t program_size);
 
-// Loads a program from a file path into memory
-void read_program_to_memory(CHIP8* chip8, const char* program_path);
-
 // Runs the next instruction and checks for input
 void tick(CHIP8* chip8, Display* display);
 

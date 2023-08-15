@@ -9,6 +9,7 @@ Display display_init() {
     Display display;
 	fillScreen(ST7735_BLACK);
 	display_clear(&display);
+	display.extended_resolution = false;
     return display;
 }
 
