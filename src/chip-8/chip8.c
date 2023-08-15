@@ -7,9 +7,9 @@
 #include "chip-8/chip8.h"
 #include "chip-8/chip8_opcodes.h"
 
-CHIP8 chip8_init(unsigned char* program, size_t program_size) {
+CHIP8 chip8_init(u8* program, size_t program_size) {
 	CHIP8 chip8;
-	unsigned char fontset[80] = {
+	u8 fontset[80] = {
 		0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
 		0x20, 0x60, 0x20, 0x20, 0x70, // 1
 		0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
@@ -69,11 +69,11 @@ void tick(CHIP8* chip8, Display* display) {
 	if (chip8->delay_timer > 0)
 		chip8->delay_timer--;
 	
-	unsigned short instruction = fetch_instruction(chip8);
+	u16 instruction = fetch_instruction(chip8);
 	decode_and_execute(chip8, display, instruction);
 }
 
-unsigned short fetch_instruction(CHIP8* chip8) {
+u16 fetch_instruction(CHIP8* chip8) {
 	if (chip8->program_counter <= 0xFFF) {
 		unsigned short instruction = (chip8->memory[chip8->program_counter] << 8) | chip8->memory[chip8->program_counter + 1];
 		chip8->program_counter += 2;
@@ -83,13 +83,13 @@ unsigned short fetch_instruction(CHIP8* chip8) {
 	}
 }
 
-void decode_and_execute(CHIP8* chip8, Display* display, unsigned short instruction) {
+bool decode_and_execute(CHIP8* chip8, Display* display, u16 instruction) {
 	// Possible Arguments
-	unsigned char  X   = (instruction & 0x0F00) >> 8;
-	unsigned char  Y   = (instruction & 0x00F0) >> 4;
-	unsigned char  N   = (instruction & 0x000F);
-	unsigned char  NN  = (instruction & 0x00FF);
-	unsigned short NNN = (instruction & 0x0FFF);
+	u8 X   = (instruction & 0x0F00) >> 8;
+	u8 Y   = (instruction & 0x00F0) >> 4;
+	u8 N   = (instruction & 0x000F);
+	u8 NN  = (instruction & 0x00FF);
+	u16 NNN = (instruction & 0x0FFF);
 		
 	switch((instruction & 0xF000) >> 12) {
 		case 0x00:
@@ -97,7 +97,7 @@ void decode_and_execute(CHIP8* chip8, Display* display, unsigned short instructi
 				op_00E0(chip8, display);
 			} else if (instruction == 0x00EE) { 
 				op_00EE(chip8);
-			}
+			} else return false;
 			break;
 		case 0x01:
 			op_1NNN(chip8, NNN);
@@ -149,6 +149,8 @@ void decode_and_execute(CHIP8* chip8, Display* display, unsigned short instructi
 				case 14:
 					op_8XYE(chip8, X);
 					break;
+				default:
+					return false;
 		   	}
 			break;
 		case 0x09:
@@ -174,6 +176,8 @@ void decode_and_execute(CHIP8* chip8, Display* display, unsigned short instructi
 				case 0xa1:
 					op_EXA1(chip8, X);
 					break;
+				default:
+					return false;
 			}
 			break;
 		case 0x0f:
@@ -205,7 +209,11 @@ void decode_and_execute(CHIP8* chip8, Display* display, unsigned short instructi
 				case 0x65:
 					op_FX65(chip8, X);
 					break;
+				default:
+					return false;
 			}
 			break;
 	}
+
+	return true;
 }

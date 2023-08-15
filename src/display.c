@@ -3,7 +3,7 @@
 #include "hw.h"
 #include "ST7735_TFT.h"
 
-#include "chip-8/display.h"
+#include "display.h"
 
 Display display_init() {
     Display display;

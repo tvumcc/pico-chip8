@@ -1,7 +1,7 @@
 #ifndef DEVICE_H
 #define DEVICE_H
 
-#include "chip-8/display.h"
+#include "display.h"
 #include "chip-8/chip8.h"
 #include "system.h"
 
