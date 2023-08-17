@@ -4,7 +4,6 @@
 
 typedef struct SCHIP8 {
 	CHIP8 chip8;
-	bool extended_resolution;
 	u8 flags[16];
 } SCHIP8;
 

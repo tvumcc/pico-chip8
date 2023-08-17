@@ -136,22 +136,25 @@ void op_CXNN(CHIP8* chip8, u8 X, u8 NN) {
 void op_DXYN(CHIP8* chip8, Display* display, u8 X, u8 Y, u8 N) {
 	chip8->registers[15] = 0;
 
-	int y_pos = chip8->registers[Y] % 32;
+	int screen_height = display->extended_resolution ? SUPER_CHIP8_HEIGHT : CHIP8_HEIGHT;
+	int screen_width = display->extended_resolution ? SUPER_CHIP8_WIDTH : CHIP8_WIDTH;
+
+	int y_pos = chip8->registers[Y] % screen_height;
+
 	for (u8 i = 0; i < N; i++) {
-		int x_pos = chip8->registers[X] % 64;
-		u8 sprite_byte = chip8->memory[chip8->index_register + i];
-		for (int j = 0; j < 8; j++) {
-			if (x_pos > 63) {
-				break;
-			}
-				
-			if (((sprite_byte & (0x80 >> j)) >> (7 - j)) == 1) // Check if the bit needed is set to 1, if so draw it
+		if (y_pos >= screen_height) break;
+		int x_pos = chip8->registers[X] % screen_width;
+		u8 row = chip8->memory[chip8->index_register + i];
+
+		for (int j = 7; j >= 0; j--) {
+			if (x_pos >= screen_width) break;
+			if ((row << j) & 1) // Check if the bit needed is set to 1, if so draw it
 				if (display_set_pixel(display, x_pos, y_pos))
 					chip8->registers[15] = 1;
 			x_pos++;
 		}
+
 		y_pos++;
-		
 	}
 	display_draw(display);
 }

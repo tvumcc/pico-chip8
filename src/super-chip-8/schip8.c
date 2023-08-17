@@ -5,6 +5,16 @@ SCHIP8 schip8_init(u8* program, size_t program_size) {
 	schip8.chip8 = chip8_init(program, program_size);
 	schip8.extended_resolution = false;
 
+	// Big hex font
+	for (int k = 0, i = 80; k < 80; i+=2, k++) {
+		u8 out = 0;
+		for (int j = 0; j < 4; j++) {
+			out |= ((schip8.chip8.memory[k] & (1 << (j+4))) ? (3 << (j * 2)) : (0))
+		}
+		schip8.chip8.memory[i] = out;
+		schip8.chip8.memory[i+1] = out;
+	}
+
 	// Initialize flag registers
 	for (int i = 0; i < 16; i++) {
 		schip8.flags = 0;

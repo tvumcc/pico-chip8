@@ -8,19 +8,24 @@
 Display display_init() {
     Display display;
 	fillScreen(ST7735_BLACK);
+	display.extended_resolution = true;
 	display_clear(&display);
 	display.extended_resolution = false;
     return display;
 }
 
 void display_draw(Display* display) {
-	for (int y = 0; y < CHIP8_HEIGHT; y++) {
-		for (int x = 0; x < CHIP8_WIDTH; x++) {
+	int screen_height = display->extended_resolution ? SUPER_CHIP8_HEIGHT : CHIP8_HEIGHT;
+	int screen_width = display->extended_resolution ? SUPER_CHIP8_WIDTH : CHIP8_WIDTH;
+	int pixel_size = display->extended_resolution ? 1 : 2;
+
+	for (int y = 0; y < screen_height; y++) {
+		for (int x = 0; x < screen_width; x++) {
 			if (display->prev_buffer[y][x] != display->pixelArray[y][x]) {
 				if (display->pixelArray[y][x] == 0xFF) {
-					fillRect(x*2+1, y*2+32, 2, 2, ST7735_WHITE);
+					fillRect(x*pixel_size+1, y*pixel_size+32, pixel_size, pixel_size, ST7735_WHITE);
 				} else {
-					fillRect(x*2+1, y*2+32, 2, 2, ST7735_BLACK);
+					fillRect(x*pixel_size+1, y*pixel_size+32, pixel_size, pixel_size, ST7735_BLACK);
 				}
 			}
 			display->prev_buffer[y][x] = display->pixelArray[y][x];
@@ -40,11 +45,21 @@ bool display_set_pixel(Display* display, int x, int y) {
 }
 
 void display_clear(Display* display) {
-	for (int y = 0; y < CHIP8_HEIGHT; y++) {
-		for (int x = 0; x < CHIP8_WIDTH; x++) {
+	for (int y = 0; y < (display->extended_resolution ? SUPER_CHIP8_HEIGHT : CHIP8_HEIGHT); y++) {
+		for (int x = 0; x < (display->extended_resolution ? SUPER_CHIP8_WIDTH : CHIP8_WIDTH); x++) {
 			display->pixelArray[y][x] = 0x00;
 			display->prev_buffer[y][x] = 0x00;
 		}
 	}
 	fillRect(0, 32, 130, 64, ST7735_BLACK);
+}
+
+void display_hi_res(Display* display) {
+	display->extended_resolution = true;
+	display_draw(display);
+}
+
+void display_low_res(Display* display) {
+	display->extended_resolution = false;
+	display_draw(display);
 }

@@ -8,7 +8,7 @@
 
 // Documentation comments from http://johnearnest.github.io/Octo/docs/SuperChip.html
 
-// Enable 128x64 high resolution graphics mode.(hires)
+// Enable 128x64 high resolution graphics mode (hires)
 void op_00FF(SCHIP8* schip8, Display* display);
 
 // Disable high resolution graphics mode and return to 64x32
