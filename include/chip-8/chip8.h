@@ -22,11 +22,14 @@ typedef struct CHIP8 {
     u8 delay_timer; // 8-bit timer, decremented at 60hz until it reaches zero
     u8 sound_timer; // 8-bit timer, decremented at 60hz until it reaches zero but plays a noise when non-zero
 
-	unsigned int program_length; // Length/Size of the program being run in the CHIP-8
+	// Super CHIP8 extension
+	u8 flags[16];
+
+	// XO-CHIP extension
 } CHIP8;
 
 // Initialize a CHIP8 struct
-CHIP8 chip8_init(u8* program, size_t program_size);
+void chip8_init(CHIP8* chip8, u8* program, size_t program_size);
 
 // Runs the next instruction and checks for input
 void tick(CHIP8* chip8, Display* display);
@@ -35,6 +38,5 @@ void tick(CHIP8* chip8, Display* display);
 u16 fetch_instruction(CHIP8* chip8);
 
 // Decode an instruction and execute it
-// Return: true if instruction is a valid CHIP-8 instruction, false otherwise
-bool decode_and_execute(CHIP8* chip8, Display* display, u16 instruction);
+void decode_and_execute(CHIP8* chip8, Display* display, u16 instruction);
 #endif

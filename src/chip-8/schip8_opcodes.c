@@ -1,15 +1,16 @@
-#include "super-chip-8/schip8_opcodes.h"
 #include "device.h"
 
-void op_00FF(SCHIP8* schip8, Display* display) {
+#include "chip-8/schip8_opcodes.h"
+
+void op_00FF(Display* display) {
 	display_hi_res(display);
 }
 
-void op_00FE(SCHIP8* schip8, Display* display) {
+void op_00FE(Display* display) {
 	display_low_res(display);
 }
 
-void op_00CN(SCHIP8* schip8, Display* display, u8 N) {
+void op_00CN(Display* display, u8 N) {
 	int screen_height = display->extended_resolution ? SUPER_CHIP8_HEIGHT : CHIP8_HEIGHT;
 	int screen_width = display->extended_resolution ? SUPER_CHIP8_WIDTH : CHIP8_WIDTH;
 
@@ -21,9 +22,11 @@ void op_00CN(SCHIP8* schip8, Display* display, u8 N) {
 			}
 		}
 	}
+
+	display_draw(display);
 }
 
-void op_00FB(SCHIP8* schip8, Display* display) {
+void op_00FB(Display* display) {
 	int screen_height = display->extended_resolution ? SUPER_CHIP8_HEIGHT : CHIP8_HEIGHT;
 	int screen_width = display->extended_resolution ? SUPER_CHIP8_WIDTH : CHIP8_WIDTH;
 
@@ -35,9 +38,11 @@ void op_00FB(SCHIP8* schip8, Display* display) {
 			}
 		}
 	}
+
+	display_draw(display);
 }
 
-void op_00FC(SCHIP8* schip8, Display* display) {
+void op_00FC(Display* display) {
 	int screen_height = display->extended_resolution ? SUPER_CHIP8_HEIGHT : CHIP8_HEIGHT;
 	int screen_width = display->extended_resolution ? SUPER_CHIP8_WIDTH : CHIP8_WIDTH;
 	
@@ -49,50 +54,52 @@ void op_00FC(SCHIP8* schip8, Display* display) {
 			}
 		}
 	}
+
+	display_draw(display);
 }
 
-void op_00FD(SCHIP8* schip8) {
+void op_00FD() {
 	home_goto(&device);	
 }
 
-void op_DXY0(SCHIP8* schip8, Display* display, u8 X, u8 Y) {
-	schip8->chip8.registers[15] = 0;
+void op_DXY0(CHIP8* chip8, Display* display, u8 X, u8 Y) {
+	chip8->registers[15] = 0;
 
 	int screen_height = display->extended_resolution ? SUPER_CHIP8_HEIGHT : CHIP8_HEIGHT;
 	int screen_width = display->extended_resolution ? SUPER_CHIP8_WIDTH : CHIP8_WIDTH;
 
-	int y_pos = schip8->chip8.registers[Y] % screen_height;
+	int y_pos = chip8->registers[Y] % screen_height;
 	
 	for (int i = 0; i < 32; i += 2) {
 		if (y_pos >= screen_height) break;
-		int x_pos = schip8->chip8.registers[X] % screen_width;
-		u16 row = (schip8->chip8.memory[schip8->chip8.index_register + i] << 8) | schip8->chip8.memory[schip8->chip8.index_register + i+1];	
+		int x_pos = chip8->registers[X] % screen_width;
+		u16 row = (chip8->memory[chip8->index_register + i] << 8) | chip8->memory[chip8->index_register + i+1];	
 
 		for (int j = 15; j >= 0; j--) {
 			if (x_pos >= screen_width) break;
 			if (row & (1 << j))
 				if (display_set_pixel(display, x_pos, y_pos))
-					schip8->chip8.registers[15] = 1;
+					chip8->registers[15] = 1;
 			x_pos++;
 		}
 
 		y_pos++;
-	}		
+	}
 	display_draw(display);
 }
 
-void op_FX30(SCHIP8* schip8, u8 X) {
-	schip8->chip8.index_register = 0x50 + (10 * schip8->chip8.registers[X]);
+void op_FX30(CHIP8* chip8, u8 X) {
+	chip8->index_register = 0x50 + (10 * chip8->registers[X]);
 }
 
-void op_FX75(SCHIP8* schip8, u8 X) {
+void op_FX75(CHIP8* chip8, u8 X) {
 	for (int i = 0; i <= X; i++) {
-		schip8->flags[i] = schip8->chip8.registers[i];
+		chip8->flags[i] = chip8->registers[i];
 	}
 }
 
-void op_FX85(SCHIP8* schip8, u8 X) {
+void op_FX85(CHIP8* chip8, u8 X) {
 	for (int i = 0; i <= X; i++) {
-		schip8->chip8.registers[i] = schip8->flags[i];
+		chip8->registers[i] = chip8->flags[i];
 	}
 }

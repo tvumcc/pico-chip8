@@ -3,13 +3,13 @@
 #include <stdlib.h>
 
 typedef struct Program {
-	char name[14];
+	char name[16];
 	unsigned char* data;
 	size_t size;
 } Program;
 
 extern Program chip8_roms[10];
-extern Program schip8_roms[2];
+extern Program schip8_roms[3];
 
 extern unsigned char ibm_program[132];
 extern unsigned char octojam2_program[1240];
@@ -22,6 +22,7 @@ extern unsigned char tank_program[224];
 extern unsigned char tetris_program[494];
 extern unsigned char pong_program[246];
 
-extern unsigned char octovore_program[3549];
 extern unsigned char sine_program[282];
+extern unsigned char binding_program[3552];
+extern unsigned char snake_program[1438];
 #endif

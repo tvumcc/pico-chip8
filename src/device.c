@@ -6,15 +6,13 @@
 
 #define min(a, b) (((a) < (b)) ? (a) : (b))
 
+PicoCHIP8 device;
 Display display;
 CHIP8 chip8;
-SCHIP8 schip8;
-PicoCHIP8 device;
 
 void home_goto(PicoCHIP8* device) {
 	fillScreen(ST7735_BLACK);
 	drawText(3, 4, "PicoCHIP-8", ST7735_WHITE, ST7735_BLACK, 2);
-	drawText(16, 20, "written by piigle", ST7735_WHITE, ST7735_BLACK, 1);
 	drawText(32, 40, "CHIP-8", ST7735_WHITE, ST7735_BLACK, 1);
 	drawText(32, 50, "Super CHIP-8", ST7735_WHITE, ST7735_BLACK, 1);
 	drawText(32, 60, "XO-CHIP", ST7735_WHITE, ST7735_BLACK, 1);
@@ -104,7 +102,7 @@ void rom_select_process_buttons(PicoCHIP8* device) {
 		// Move cursor down
 	} else if (device->key_state[KEY_8] && (to_ms_since_boot(get_absolute_time()) > debounce_timer + debounce)) {
 		fillRect(20, 30 + (device->rom_selection % 8) * 10, 5, 7, ST7735_BLACK);
-		device->rom_selection = (device->rom_selection + 1) % (num_roms-1);
+		device->rom_selection = (device->rom_selection + 1) % (num_roms);
 		if (device->rom_selection / 8 != device->page) {
 			device->page = device->rom_selection / 8;
 			rom_select_goto(device);
@@ -117,10 +115,10 @@ void rom_select_process_buttons(PicoCHIP8* device) {
 		display = display_init();
 		switch (device->system) {
 			case CHIP_8:
-				chip8 = chip8_init(chip8_roms[device->rom_selection].data, chip8_roms[device->rom_selection].size);
+				chip8_init(&chip8, chip8_roms[device->rom_selection].data, chip8_roms[device->rom_selection].size);
 				break;
 			case SuperCHIP_8:
-				schip8 = schip8_init(schip8_roms[device->rom_selection].data, schip8_roms[device->rom_selection].size);
+				chip8_init(&chip8, schip8_roms[device->rom_selection].data, schip8_roms[device->rom_selection].size);
 				break;
 			default:
 				break;

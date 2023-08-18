@@ -6,9 +6,9 @@
 
 #include "chip-8/chip8.h"
 #include "chip-8/chip8_opcodes.h"
+#include "chip-8/schip8_opcodes.h"
 
-CHIP8 chip8_init(u8* program, size_t program_size) {
-	CHIP8 chip8;
+void chip8_init(CHIP8* chip8, u8* program, size_t program_size) {
 	u8 fontset[80] = {
 		0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
 		0x20, 0x60, 0x20, 0x20, 0x70, // 1
@@ -28,39 +28,47 @@ CHIP8 chip8_init(u8* program, size_t program_size) {
 		0xF0, 0x80, 0xF0, 0x80, 0x80, // F
 	};
 
+	// Big hex font
+	for (int k = 0, i = 80; k < 80; i+=2, k++) {
+		u8 out = 0;
+		for (int j = 0; j < 4; j++) {
+			out |= ((chip8->memory[k] & (1 << (j+4))) ? (3 << (j * 2)) : (0));
+		}
+		chip8->memory[i] = out;
+		chip8->memory[i+1] = out;
+	}
+
 	// Initialize memory to 0
 	for (int i = 0; i < 4096; i++) {
 		// Load the first 80 bytes with the fontset
 		if (i < 80) {
-			chip8.memory[i] = fontset[i];
+			chip8->memory[i] = fontset[i];
 		} else {
-			chip8.memory[i] = 0;
+			chip8->memory[i] = 0;
 		}
 
 	}
 
 	// Load program into memory
 	for (int i = 0; i < program_size; i++) {
-		chip8.memory[0x200 + i] = program[i];
+		chip8->memory[0x200 + i] = program[i];
 	}
 
 	// Initialize registers and stack to 0
 	for (int i = 0; i < 16; i++) {
-		chip8.registers[i] = 0;
-		chip8.stack[i] = 0;
-		chip8.keys[i] = 0;
+		chip8->registers[i] = 0;
+		chip8->stack[i] = 0;
+		chip8->keys[i] = 0;
+		chip8->flags[i] = 0;
 	}
 
 
 	// Initialize the rest of the values
-	chip8.stack_count = 0;
-	chip8.program_counter = 0x200;
-	chip8.index_register = 0;
-	chip8.delay_timer = 0;
-	chip8.sound_timer = 0;
-	chip8.program_length = (unsigned int)program_size;
-
-	return chip8;
+	chip8->stack_count = 0;
+	chip8->program_counter = 0x200;
+	chip8->index_register = 0;
+	chip8->delay_timer = 0;
+	chip8->sound_timer = 0;
 }
 
 void tick(CHIP8* chip8, Display* display) {
@@ -83,7 +91,7 @@ u16 fetch_instruction(CHIP8* chip8) {
 	}
 }
 
-bool decode_and_execute(CHIP8* chip8, Display* display, u16 instruction) {
+void decode_and_execute(CHIP8* chip8, Display* display, u16 instruction) {
 	// Possible Arguments
 	u8 X   = (instruction & 0x0F00) >> 8;
 	u8 Y   = (instruction & 0x00F0) >> 4;
@@ -93,11 +101,33 @@ bool decode_and_execute(CHIP8* chip8, Display* display, u16 instruction) {
 		
 	switch((instruction & 0xF000) >> 12) {
 		case 0x00:
-	    	if (instruction == 0x00E0) { 
-				op_00E0(chip8, display);
-			} else if (instruction == 0x00EE) { 
-				op_00EE(chip8);
-			} else return false;
+			switch(NN) {
+				case 0xE0:
+					op_00E0(chip8, display);
+					break;
+				case 0xEE:
+					op_00EE(chip8);
+					break;
+				case 0xFF:
+					op_00FF(display);
+					break;
+				case 0xFE:
+					op_00FE(display);
+					break;
+				case 0xC0: case 0xC1: case 0xC2: case 0xC3: case 0xC4: case 0xC5: case 0xC6: case 0xC7:
+				case 0xC8: case 0xC9: case 0xCA: case 0xCB: case 0xCC: case 0xCD: case 0xCE: case 0xCF:
+					op_00CN(display, N);
+					break;
+				case 0xFB:
+					op_00FB(display);
+					break;
+				case 0xFC:
+					op_00FC(display);
+					break;
+				case 0xFD:
+					op_00FD();
+					break;
+			}
 			break;
 		case 0x01:
 			op_1NNN(chip8, NNN);
@@ -149,8 +179,6 @@ bool decode_and_execute(CHIP8* chip8, Display* display, u16 instruction) {
 				case 14:
 					op_8XYE(chip8, X);
 					break;
-				default:
-					return false;
 		   	}
 			break;
 		case 0x09:
@@ -166,7 +194,8 @@ bool decode_and_execute(CHIP8* chip8, Display* display, u16 instruction) {
 			op_CXNN(chip8, X, NN);
 			break;	
 		case 0x0d:
-			op_DXYN(chip8, display, X, Y, N);
+			if (N == 0) op_DXY0(chip8, display, X, Y);
+			else op_DXYN(chip8, display, X, Y, N);
 			break;
 		case 0x0e:
 			switch(NN) {
@@ -176,8 +205,6 @@ bool decode_and_execute(CHIP8* chip8, Display* display, u16 instruction) {
 				case 0xa1:
 					op_EXA1(chip8, X);
 					break;
-				default:
-					return false;
 			}
 			break;
 		case 0x0f:
@@ -209,11 +236,13 @@ bool decode_and_execute(CHIP8* chip8, Display* display, u16 instruction) {
 				case 0x65:
 					op_FX65(chip8, X);
 					break;
-				default:
-					return false;
+				case 0x75:
+					op_FX75(chip8, X);
+					break;
+				case 0x85:
+					op_FX85(chip8, X);
+					break;
 			}
 			break;
 	}
-
-	return true;
 }

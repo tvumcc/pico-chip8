@@ -5,14 +5,12 @@
 #include "hw.h"
 #include "ST7735_TFT.h"
 
-#include "chip-8/chip8.h"
-#include "super-chip-8/schip8.h"
-#include "xo-chip/xochip.h"
-
 #include "roms.h"
 #include "system.h"
 #include "device.h"
 #include "display.h"
+
+#include "chip-8/chip8.h"
 
 // The following are exact redefinitions that are already defined in the pico-st7735 CMakeLists.txt
 // If the hardware configuration needs to be changed, these can be overriden
@@ -63,7 +61,7 @@ int main() {
 
 
 	unsigned int last_frame = to_ms_since_boot(get_absolute_time());
-	unsigned int clock_speed = 1;
+	unsigned int clock_speed = 5;
 	srand(last_frame); 
 
 	device.state = STATE_HOME;
@@ -86,16 +84,8 @@ int main() {
 			if (device.state == STATE_GAME) {
 				unsigned int current_time = to_ms_since_boot(get_absolute_time());
 				if (current_time > last_frame + clock_speed) {
-					switch (device.system) {
-						case CHIP_8:
-							for (int i = 0; i < 16; i++) chip8.keys[i] = device.key_state[keys[i]];
-							tick(&chip8, &display);
-							break;
-						case SuperCHIP_8:
-							for (int i = 0; i < 16; i++) schip8.chip8.keys[i] = device.key_state[keys[i]];
-							schip8_tick(&schip8, &display);
-							break;
-					}
+					for (int i = 0; i < 16; i++) chip8.keys[i] = device.key_state[keys[i]];
+					tick(&chip8, &display);
 					last_frame = current_time;
 				}
 			} else if (device.state == STATE_HOME) {
