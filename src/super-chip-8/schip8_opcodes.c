@@ -17,7 +17,7 @@ void op_00CN(SCHIP8* schip8, Display* display, u8 N) {
 		for (int y = screen_height-1; y >= 0; y--) {
 			if (y < N) display->pixelArray[y][x] = 0x00;
 			else {
-				display->pixelArray[y][x] = display->pixelArray[y+N][x];
+				display->pixelArray[y][x] = display->pixelArray[y-N][x];
 			}
 		}
 	}
@@ -43,7 +43,7 @@ void op_00FC(SCHIP8* schip8, Display* display) {
 	
 	for (int y = 0; y < screen_height; y++) {
 		for (int x = 0; x < screen_width; x--) {
-			if (x > screen_width-4) display->pixelArray[y][x] = 0x00;
+			if (x >= screen_width-4) display->pixelArray[y][x] = 0x00;
 			else {
 				display->pixelArray[y][x] = display->pixelArray[y][x+4];
 			}
@@ -51,12 +51,12 @@ void op_00FC(SCHIP8* schip8, Display* display) {
 	}
 }
 
-void op_00FD(SCHIP8* schip8, Device* device) {
-	home_goto(device);	
+void op_00FD(SCHIP8* schip8) {
+	home_goto(&device);	
 }
 
 void op_DXY0(SCHIP8* schip8, Display* display, u8 X, u8 Y) {
-	chip8->registers[15] = 0;
+	schip8->chip8.registers[15] = 0;
 
 	int screen_height = display->extended_resolution ? SUPER_CHIP8_HEIGHT : CHIP8_HEIGHT;
 	int screen_width = display->extended_resolution ? SUPER_CHIP8_WIDTH : CHIP8_WIDTH;
@@ -70,9 +70,9 @@ void op_DXY0(SCHIP8* schip8, Display* display, u8 X, u8 Y) {
 
 		for (int j = 15; j >= 0; j--) {
 			if (x_pos >= screen_width) break;
-			if ((row << j) & 1)
+			if (row & (1 << j))
 				if (display_set_pixel(display, x_pos, y_pos))
-					chip8->registers[15] = 1;
+					schip8->chip8.registers[15] = 1;
 			x_pos++;
 		}
 
@@ -82,17 +82,17 @@ void op_DXY0(SCHIP8* schip8, Display* display, u8 X, u8 Y) {
 }
 
 void op_FX30(SCHIP8* schip8, u8 X) {
-	schip8->chip8.index_register = 0x50 + (10 * X);
+	schip8->chip8.index_register = 0x50 + (10 * schip8->chip8.registers[X]);
 }
 
 void op_FX75(SCHIP8* schip8, u8 X) {
 	for (int i = 0; i <= X; i++) {
-		schip8.flags[i] = schip8->chip8.registers[i];
+		schip8->flags[i] = schip8->chip8.registers[i];
 	}
 }
 
 void op_FX85(SCHIP8* schip8, u8 X) {
 	for (int i = 0; i <= X; i++) {
-		schip8->chip8.registers[i] = schip8.flags[i];
+		schip8->chip8.registers[i] = schip8->flags[i];
 	}
 }

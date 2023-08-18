@@ -24,7 +24,7 @@ void op_00FB(SCHIP8* schip8, Display* display);
 void op_00FC(SCHIP8* schip8, Display* display);
 
 // Exit the interpreter
-void op_00FD(SCHIP8* schip8, Device* device);
+void op_00FD(SCHIP8* schip8);
 
 // Draw a 16x16 sprite
 void op_DXY0(SCHIP8* schip8, Display* display, u8 X, u8 Y);

@@ -66,7 +66,6 @@ int main() {
 	unsigned int clock_speed = 1;
 	srand(last_frame); 
 
-	PicoCHIP8 device;
 	device.state = STATE_HOME;
 	device.system_selection = 0;
 	device.rom_selection = 0;
@@ -87,8 +86,16 @@ int main() {
 			if (device.state == STATE_GAME) {
 				unsigned int current_time = to_ms_since_boot(get_absolute_time());
 				if (current_time > last_frame + clock_speed) {
-					for (int i = 0; i < 16; i++) chip8.keys[i] = device.key_state[keys[i]];
-					tick(&chip8, &display);
+					switch (device.system) {
+						case CHIP_8:
+							for (int i = 0; i < 16; i++) chip8.keys[i] = device.key_state[keys[i]];
+							tick(&chip8, &display);
+							break;
+						case SuperCHIP_8:
+							for (int i = 0; i < 16; i++) schip8.chip8.keys[i] = device.key_state[keys[i]];
+							schip8_tick(&schip8, &display);
+							break;
+					}
 					last_frame = current_time;
 				}
 			} else if (device.state == STATE_HOME) {

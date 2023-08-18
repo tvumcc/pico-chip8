@@ -10,7 +10,7 @@ typedef struct SCHIP8 {
 // Initialize a SCHIP8 struct
 SCHIP8 schip8_init(u8* program, size_t program_size);
 
-void tick(SCHIP* schip8, Display* display, Device* device);
+void schip8_tick(SCHIP8* schip8, Display* display);
 
-void decode_and_execute(SCHIP8* schip8, Display* display, u16 instruction, Device* device);
+void schip8_decode_and_execute(SCHIP8* schip8, Display* display, u16 instruction);
 #endif

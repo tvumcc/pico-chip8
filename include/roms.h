@@ -9,6 +9,7 @@ typedef struct Program {
 } Program;
 
 extern Program chip8_roms[10];
+extern Program schip8_roms[2];
 
 extern unsigned char ibm_program[132];
 extern unsigned char octojam2_program[1240];
@@ -20,4 +21,7 @@ extern unsigned char merlin_program[345];
 extern unsigned char tank_program[224];
 extern unsigned char tetris_program[494];
 extern unsigned char pong_program[246];
+
+extern unsigned char octovore_program[3549];
+extern unsigned char sine_program[282];
 #endif

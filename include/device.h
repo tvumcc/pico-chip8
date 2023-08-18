@@ -2,8 +2,10 @@
 #define DEVICE_H
 
 #include "display.h"
-#include "chip-8/chip8.h"
 #include "system.h"
+
+#include "chip-8/chip8.h"
+#include "super-chip-8/schip8.h"
 
 // Row 1
 #define KEY_1 0
@@ -31,9 +33,6 @@
 #define STATE_ROM_SELECT 1
 #define STATE_GAME 2
 
-extern Display display;
-extern CHIP8 chip8;
-
 typedef struct PicoCHIP8 {
 	uint8_t key_state[18]; // 16 and 17 are for RESET and SELECT	
 	uint8_t state;
@@ -44,6 +43,11 @@ typedef struct PicoCHIP8 {
 	uint8_t rom_selection;
 	uint8_t page;
 } PicoCHIP8;
+
+extern PicoCHIP8 device;
+extern Display display;
+extern CHIP8 chip8;
+extern SCHIP8 schip8;
 
 void home_goto(PicoCHIP8* device);
 void home_process_buttons(PicoCHIP8* device);

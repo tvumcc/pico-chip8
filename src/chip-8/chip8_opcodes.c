@@ -148,7 +148,7 @@ void op_DXYN(CHIP8* chip8, Display* display, u8 X, u8 Y, u8 N) {
 
 		for (int j = 7; j >= 0; j--) {
 			if (x_pos >= screen_width) break;
-			if ((row << j) & 1) // Check if the bit needed is set to 1, if so draw it
+			if ((row & (1 << j))) // Check if the bit needed is set to 1, if so draw it
 				if (display_set_pixel(display, x_pos, y_pos))
 					chip8->registers[15] = 1;
 			x_pos++;
