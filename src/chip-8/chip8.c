@@ -171,13 +171,13 @@ void decode_and_execute(CHIP8* chip8, Display* display, u16 instruction) {
 					op_8XY5(chip8, X, Y);
 					break;
 				case 6:
-					op_8XY6(chip8, X);
+					op_8XY6(chip8, X, Y);
 					break;
 				case 7:
 					op_8XY7(chip8, X, Y);
 					break;
 				case 14:
-					op_8XYE(chip8, X);
+					op_8XYE(chip8, X, Y);
 					break;
 		   	}
 			break;
@@ -194,8 +194,11 @@ void decode_and_execute(CHIP8* chip8, Display* display, u16 instruction) {
 			op_CXNN(chip8, X, NN);
 			break;	
 		case 0x0d:
-			if (N == 0) op_DXY0(chip8, display, X, Y);
-			else op_DXYN(chip8, display, X, Y, N);
+			if (N == 0) {
+				op_DXY0(chip8, display, X, Y);
+			} else {
+				op_DXYN(chip8, display, X, Y, N);
+			}
 			break;
 		case 0x0e:
 			switch(NN) {

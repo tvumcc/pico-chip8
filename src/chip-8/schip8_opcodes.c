@@ -69,22 +69,39 @@ void op_DXY0(CHIP8* chip8, Display* display, u8 X, u8 Y) {
 	int screen_width = display->extended_resolution ? SUPER_CHIP8_WIDTH : CHIP8_WIDTH;
 
 	int y_pos = chip8->registers[Y] % screen_height;
-	
-	for (int i = 0; i < 32; i += 2) {
-		if (y_pos >= screen_height) break;
-		int x_pos = chip8->registers[X] % screen_width;
-		u16 row = (chip8->memory[chip8->index_register + i] << 8) | chip8->memory[chip8->index_register + i+1];	
+	if (display->extended_resolution) {
+		for (int i = 0; i < 32; i += 2) {
+			if (y_pos >= screen_height) break;
+			int x_pos = chip8->registers[X] % screen_width;
+			u16 row = (chip8->memory[chip8->index_register + i] << 8) | chip8->memory[chip8->index_register + i+1];	
 
-		for (int j = 15; j >= 0; j--) {
-			if (x_pos >= screen_width) break;
-			if (row & (1 << j))
-				if (display_set_pixel(display, x_pos, y_pos))
-					chip8->registers[15] = 1;
-			x_pos++;
+			for (int j = 15; j >= 0; j--) {
+				if (x_pos >= screen_width) break;
+				if (row & (1 << j))
+					if (display_set_pixel(display, x_pos, y_pos))
+						chip8->registers[15] = 1;
+				x_pos++;
+			}
+
+			y_pos++;
 		}
+	} else {
+		for (int i = 0; i < 16; i++) {
+			if (y_pos >= screen_height) break;
+			int x_pos = chip8->registers[X] % screen_width;
+			u8 row = chip8->memory[chip8->index_register + i];
 
-		y_pos++;
-	}
+			for (int j = 7; j >= 0; j--) {
+				if (x_pos >= screen_width) break;
+				if (row & (1 << j))
+					if (display_set_pixel(display, x_pos, y_pos))
+						chip8->registers[15] = 1;
+				x_pos++;
+			}
+
+			y_pos++;
+		}
+	}	
 	display_draw(display);
 }
 

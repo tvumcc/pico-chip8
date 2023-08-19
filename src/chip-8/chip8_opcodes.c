@@ -71,46 +71,55 @@ void op_8XY3(CHIP8* chip8, u8 X, u8 Y) {
 }
 
 void op_8XY4(CHIP8* chip8, u8 X, u8 Y) {
-	int result = chip8->registers[X] + chip8->registers[Y];
+	int result = (int)chip8->registers[X] + (int)chip8->registers[Y];
+
 	if (result > 255) {
+		result %= 256;
+		chip8->registers[X] = (u8)(result);
 		chip8->registers[15] = 1;
-		result = (result % 255) - 1;
 	} else {
+		chip8->registers[X] = (u8)(result);
 		chip8->registers[15] = 0;
 	}
 
-	chip8->registers[X] = (u8)(result);
 }
 
 void op_8XY5(CHIP8* chip8, u8 X, u8 Y) {
-	int result = chip8->registers[X] - chip8->registers[Y];
-	chip8->registers[15] = 1;
+	int result = (int)chip8->registers[X] - (int)chip8->registers[Y];
 
 	if (chip8->registers[X] < chip8->registers[Y]) {
-		result = 256 + result;
+		result %= 256;
+		chip8->registers[X] = (u8)(result);
 		chip8->registers[15] = 0;
+	} else {
+		chip8->registers[X] = (u8)(result);
+		chip8->registers[15] = 1;
 	}
 
-	chip8->registers[X] = (u8)(result);
 }
 
-void op_8XY6(CHIP8* chip8, u8 X) {
+void op_8XY6(CHIP8* chip8, u8 X, u8 Y) {
+	chip8->registers[X] = chip8->registers[Y];
 	u8 lsb = chip8->registers[X] & 0x01;
 	chip8->registers[X] >>= 1;
 	chip8->registers[15] = lsb == 1 ? 1 : 0;	
 }
 
 void op_8XY7(CHIP8* chip8, u8 X, u8 Y) {
-	int result = chip8->registers[Y] - chip8->registers[X];
-	chip8->registers[15] = 1;
+	int result = (int)chip8->registers[Y] - (int)chip8->registers[X];
+
 	if (chip8->registers[Y] < chip8->registers[X]) {
-		result = 256 + result;
+		result %= 256;
+		chip8->registers[X] = (u8)(result);
 		chip8->registers[15] = 0;
+	} else {
+		chip8->registers[X] = (u8)(result);
+		chip8->registers[15] = 1;
 	}
-	chip8->registers[X] = (u8)(result);
 }
 
-void op_8XYE(CHIP8* chip8, u8 X) {
+void op_8XYE(CHIP8* chip8, u8 X, u8 Y) {
+	chip8->registers[X] = chip8->registers[Y];
 	u8 msb = (chip8->registers[X] & 0x80) >> 7; 
 	chip8->registers[X] <<= 1;
 	chip8->registers[15] = msb == 1 ? 1 : 0;
@@ -126,11 +135,11 @@ void op_ANNN(CHIP8* chip8, u16 NNN) {
 }
 
 void op_BNNN(CHIP8* chip8, u16 NNN) {
-	chip8->program_counter = (NNN + chip8->registers[0]) - 1;
+	chip8->program_counter = (NNN + chip8->registers[0]);
 }
 
 void op_CXNN(CHIP8* chip8, u8 X, u8 NN) {
-	chip8->registers[X] = (u8)((rand() % 256) - 1) & NN;
+	chip8->registers[X] = (u8)((rand() % 256)) & NN;
 }
 
 void op_DXYN(CHIP8* chip8, Display* display, u8 X, u8 Y, u8 N) {
@@ -148,7 +157,7 @@ void op_DXYN(CHIP8* chip8, Display* display, u8 X, u8 Y, u8 N) {
 
 		for (int j = 7; j >= 0; j--) {
 			if (x_pos >= screen_width) break;
-			if ((row & (1 << j))) // Check if the bit needed is set to 1, if so draw it
+			if (row & (1 << j)) // Check if the bit needed is set to 1, if so draw it
 				if (display_set_pixel(display, x_pos, y_pos))
 					chip8->registers[15] = 1;
 			x_pos++;
@@ -212,12 +221,12 @@ void op_FX33(CHIP8* chip8, u8 X) {
 
 void op_FX55(CHIP8* chip8, u8 X) {
 	for (u8 i = 0; i <= X; i++) {
-		chip8->memory[chip8->index_register + i] = chip8->registers[i];
+		chip8->memory[chip8->index_register++] = chip8->registers[i];
 	}
 }
 
 void op_FX65(CHIP8* chip8, u8 X) {
 	for (u8 i = 0; i <= X; i++) {
-		chip8->registers[i] = chip8->memory[chip8->index_register + i];
+		chip8->registers[i] = chip8->memory[chip8->index_register++];
 	}
 }

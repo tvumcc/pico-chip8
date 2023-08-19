@@ -61,7 +61,7 @@ int main() {
 
 
 	unsigned int last_frame = to_ms_since_boot(get_absolute_time());
-	unsigned int clock_speed = 5;
+	unsigned int clock_speed = 0;
 	srand(last_frame); 
 
 	device.state = STATE_HOME;
@@ -70,7 +70,7 @@ int main() {
 	device.page = 0;
 	device.system = CHIP_8;
 	home_goto(&device);
-	
+
 	int keys[16] = {KEY_0, KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9, KEY_A, KEY_B, KEY_C, KEY_D, KEY_E, KEY_F};
 
 	while (true) {

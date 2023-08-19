@@ -54,13 +54,13 @@ void op_8XY4(CHIP8* chip8, u8 X, u8 Y);
 void op_8XY5(CHIP8* chip8, u8 X, u8 Y);
 
 // Stores the least significant bit of VX in VF and then shifts VX to the right by 1
-void op_8XY6(CHIP8* chip8, u8 X);
+void op_8XY6(CHIP8* chip8, u8 X, u8 Y);
 
 // Sets VX to VY minus VX. VF is set to 0 when there's a borrow, and 1 when there is not
 void op_8XY7(CHIP8* chip8, u8 X, u8 Y);
 
 // Stores the most significant bit of VX in VF and then shifts VX to the left by 1
-void op_8XYE(CHIP8* chip8, u8 X);
+void op_8XYE(CHIP8* chip8, u8 X, u8 Y);
 
 // Skips the next instruction if VX does not equal VY
 void op_9XY0(CHIP8* chip8, u8 X, u8 Y);
