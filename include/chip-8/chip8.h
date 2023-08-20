@@ -34,6 +34,9 @@ void chip8_init(CHIP8* chip8, u8* program, size_t program_size);
 // Runs the next instruction and checks for input
 void tick(CHIP8* chip8, Display* display);
 
+// Decrements the timers if need, should be called at 60hz
+void timer_tick(CHIP8* chip8);
+
 // Returns the instruction the program counter is pointing to
 u16 fetch_instruction(CHIP8* chip8);
 

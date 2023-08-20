@@ -34,12 +34,11 @@ void display_draw(Display* display) {
 }   
 
 bool display_set_pixel(Display* display, int x, int y) {
-	unsigned char* pixel = &(display->pixelArray[y][x]);
-	if (*pixel == 0xFF) {
-		*pixel = 0x00;
+	if (display->pixelArray[y][x] == 0xFF) {
+		display->pixelArray[y][x] = 0x00;
 		return true; // Flipped
 	} else {
-		*pixel = 0xFF;
+		display->pixelArray[y][x] = 0xFF;
 		return false; // Did not flip
 	}
 }

@@ -28,6 +28,18 @@ void chip8_init(CHIP8* chip8, u8* program, size_t program_size) {
 		0xF0, 0x80, 0xF0, 0x80, 0x80, // F
 	};
 
+
+	// Initialize memory to 0
+	for (int i = 0; i < 4096; i++) {
+		// Load the first 80 bytes with the fontset
+		if (i < 80) {
+			chip8->memory[i] = fontset[i];
+		} else if (i < 512){
+			chip8->memory[i] = (u8)(rand() % 256);
+		}
+
+	}
+
 	// Big hex font
 	for (int k = 0, i = 80; k < 80; i+=2, k++) {
 		u8 out = 0;
@@ -36,17 +48,6 @@ void chip8_init(CHIP8* chip8, u8* program, size_t program_size) {
 		}
 		chip8->memory[i] = out;
 		chip8->memory[i+1] = out;
-	}
-
-	// Initialize memory to 0
-	for (int i = 0; i < 4096; i++) {
-		// Load the first 80 bytes with the fontset
-		if (i < 80) {
-			chip8->memory[i] = fontset[i];
-		} else {
-			chip8->memory[i] = 0;
-		}
-
 	}
 
 	// Load program into memory
@@ -72,13 +73,15 @@ void chip8_init(CHIP8* chip8, u8* program, size_t program_size) {
 }
 
 void tick(CHIP8* chip8, Display* display) {
+	u16 instruction = fetch_instruction(chip8);
+	decode_and_execute(chip8, display, instruction);
+}
+
+void timer_tick(CHIP8* chip8) {
 	if (chip8->sound_timer > 0)	
 		chip8->sound_timer--;
 	if (chip8->delay_timer > 0)
 		chip8->delay_timer--;
-	
-	u16 instruction = fetch_instruction(chip8);
-	decode_and_execute(chip8, display, instruction);
 }
 
 u16 fetch_instruction(CHIP8* chip8) {

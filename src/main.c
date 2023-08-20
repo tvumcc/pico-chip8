@@ -61,7 +61,9 @@ int main() {
 
 
 	unsigned int last_frame = to_ms_since_boot(get_absolute_time());
-	unsigned int clock_speed = 0;
+	unsigned int clock_500hz = 2;
+	unsigned int last_frame_60hz = to_ms_since_boot(get_absolute_time());
+	unsigned int clock_60hz = 17;
 	srand(last_frame); 
 
 	device.state = STATE_HOME;
@@ -83,7 +85,11 @@ int main() {
 		} else {
 			if (device.state == STATE_GAME) {
 				unsigned int current_time = to_ms_since_boot(get_absolute_time());
-				if (current_time > last_frame + clock_speed) {
+				if (current_time > last_frame_60hz + clock_60hz) {
+					timer_tick(&chip8);
+					last_frame_60hz = current_time;
+				}
+				if (current_time > last_frame + clock_500hz) {
 					for (int i = 0; i < 16; i++) chip8.keys[i] = device.key_state[keys[i]];
 					tick(&chip8, &display);
 					last_frame = current_time;
