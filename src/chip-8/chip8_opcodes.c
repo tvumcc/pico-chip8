@@ -1,9 +1,7 @@
-#include <stdint.h>
-
 #include "display.h"
 
-#include "chip-8/chip8_opcodes.h"
 #include "chip-8/chip8.h"
+#include "chip-8/chip8_opcodes.h"
 
 void op_00E0(CHIP8* chip8, Display* display) {
 	display_clear(display);	

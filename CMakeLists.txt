@@ -13,6 +13,7 @@ add_executable(${PROJECT_NAME}
 	src/roms.c
 	src/device.c
 	src/display.c
+	src/button.c
 
 	src/chip-8/chip8.c
 	src/chip-8/chip8_opcodes.c

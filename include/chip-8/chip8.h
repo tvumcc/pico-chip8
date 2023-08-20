@@ -20,7 +20,7 @@ typedef struct CHIP8 {
     u16 index_register;  // Special 16-bit register
 
     u8 delay_timer; // 8-bit timer, decremented at 60hz until it reaches zero
-    u8 sound_timer; // 8-bit timer, decremented at 60hz until it reaches zero but plays a noise when non-zero
+    u8 sound_timer; // 8-bit timer, decremented at 60hz until it reaches zero. Plays a noise when non-zero
 
 	// Super CHIP8 extension
 	u8 flags[16];
@@ -31,10 +31,10 @@ typedef struct CHIP8 {
 // Initialize a CHIP8 struct
 void chip8_init(CHIP8* chip8, u8* program, size_t program_size);
 
-// Runs the next instruction and checks for input
+// Runs the next instruction. Gets called the clock speed
 void tick(CHIP8* chip8, Display* display);
 
-// Decrements the timers if need, should be called at 60hz
+// Decrements the timers if needed, should be called at 60hz
 void timer_tick(CHIP8* chip8);
 
 // Returns the instruction the program counter is pointing to

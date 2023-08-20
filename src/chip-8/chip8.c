@@ -1,8 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include <math.h>
-
-#include "pico/stdlib.h"
 
 #include "chip-8/chip8.h"
 #include "chip-8/chip8_opcodes.h"
@@ -34,7 +30,7 @@ void chip8_init(CHIP8* chip8, u8* program, size_t program_size) {
 		// Load the first 80 bytes with the fontset
 		if (i < 80) {
 			chip8->memory[i] = fontset[i];
-		} else if (i < 512){
+		} else if (i < 512) { // Reserved memory has to have some sort of data (needed for roms such as Binding of Cosmac)
 			chip8->memory[i] = (u8)(rand() % 256);
 		}
 
