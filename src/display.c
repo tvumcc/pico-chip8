@@ -5,9 +5,15 @@
 
 #include "display.h"
 
-Display display_init() {
+Display display_init(unsigned short bg, unsigned short bp0, unsigned short bp1, unsigned short blend) {
     Display display;
-	fillScreen(ST7735_BLACK);
+	display.bitplane_mask = 0x0F;
+	display.bg_color = bg;
+	display.bitplane0_color = bp0;
+	display.bitplane1_color = bp1;
+	display.blend_color = blend;
+	fillScreen(display->bg);
+
 	display.extended_resolution = true;
 	display_clear(&display);
 	display.extended_resolution = false;
@@ -22,10 +28,19 @@ void display_draw(Display* display) {
 	for (int y = 0; y < screen_height; y++) {
 		for (int x = 0; x < screen_width; x++) {
 			if (display->prev_buffer[y][x] != display->pixelArray[y][x]) {
-				if (display->pixelArray[y][x] == 0xFF) {
-					fillRect(x*pixel_size+1, y*pixel_size+32, pixel_size, pixel_size, ST7735_WHITE);
-				} else {
-					fillRect(x*pixel_size+1, y*pixel_size+32, pixel_size, pixel_size, ST7735_BLACK);
+				switch (display->pixelArray[y][x]) {
+					case 0x00:
+						fillRect(x*pixel_size+1, y*pixel_size+32, pixel_size, pixel_size, display->bg_color);
+						break;
+					case 0x0F:
+						fillRect(x*pixel_size+1, y*pixel_size+32, pixel_size, pixel_size, display->bitplane0_color);
+						break;
+					case 0xF0:
+						fillRect(x*pixel_size+1, y*pixel_size+32, pixel_size, pixel_size, display->bitplane1_color);
+						break;
+					case 0xFF:
+						fillRect(x*pixel_size+1, y*pixel_size+32, pixel_size, pixel_size, display->blend_color);
+						break;
 				}
 			}
 			display->prev_buffer[y][x] = display->pixelArray[y][x];
@@ -34,23 +49,19 @@ void display_draw(Display* display) {
 }   
 
 bool display_set_pixel(Display* display, int x, int y) {
-	if (display->pixelArray[y][x] == 0xFF) {
-		display->pixelArray[y][x] = 0x00;
-		return true; // Flipped
-	} else {
-		display->pixelArray[y][x] = 0xFF;
-		return false; // Did not flip
-	}
+	bool ret = display->pixelArray[y][x] & display->bitplane_mask;
+	display->pixelArray[y][x] ^= display->bitplane_mask;
+	return ret;
 }
 
 void display_clear(Display* display) {
 	for (int y = 0; y < (display->extended_resolution ? SUPER_CHIP8_HEIGHT : CHIP8_HEIGHT); y++) {
 		for (int x = 0; x < (display->extended_resolution ? SUPER_CHIP8_WIDTH : CHIP8_WIDTH); x++) {
-			display->pixelArray[y][x] = 0x00;
-			display->prev_buffer[y][x] = 0x00;
+			display->pixelArray[y][x] &= ~display->bitplane_mask;
+			display->prev_buffer[y][x] &= ~display->bitplane_mask;
 		}
 	}
-	fillRect(0, 32, 130, 64, ST7735_BLACK);
+	display_draw(display);
 }
 
 void display_hi_res(Display* display) {

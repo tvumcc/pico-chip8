@@ -32,8 +32,9 @@ void op_F000NNNN(CHIP8* chip8) {
 	chip8->index_register = fetch_instruction(chip8); 
 }
 
-// Select zero or more drawing planes by bitmask (0 <= n <= 3)
-void op_FN01(CHIP8* chip8, u8 X);
+void op_FN01(Display* display, u8 X) {
+	for (int i = 0; i < 8; i++) display->bitplane_mask |= ((X & (i/4 + 1)) << i)
+}
 
 void op_F002(CHIP8* chip8) {
 	for (int i = 0; i < 16; i++) {
@@ -41,7 +42,6 @@ void op_F002(CHIP8* chip8) {
 	}
 }
 
-// Set the audio pattern playback rate to `4000*2^((vx-64)/48)` Hz
 void op_FX3A(CHIP8* chip8, u8 X) {
 	chip8->audio_playback_rate = (u16)floor(4000.0d * (pow(2.0d, ((double)chip8 - 64.0d) / 48.0d)))
 }
