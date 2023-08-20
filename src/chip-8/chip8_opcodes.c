@@ -3,6 +3,14 @@
 #include "chip-8/chip8.h"
 #include "chip-8/chip8_opcodes.h"
 
+void skip_next_instruction(CHIP8* chip8) {
+	if (chip8->memory[chip8->program_counter] == 0xF0 && chip8->memory[chip8->program_counter + 1] == 0x00) {
+		chip8->program_counter += 4;
+	} else {
+		chip8->program_counter += 2;
+	}
+}
+
 void op_00E0(CHIP8* chip8, Display* display) {
 	display_clear(display);	
 }
@@ -27,18 +35,15 @@ void op_2NNN(CHIP8* chip8, u16 NNN) {
 }
 
 void op_3XNN(CHIP8* chip8, u8 X, u8 NN) {
-	if (chip8->registers[X] == NN) 
-		chip8->program_counter += 2;
+	if (chip8->registers[X] == NN) skip_next_instruction(chip8);
 }
 
 void op_4XNN(CHIP8* chip8, u8 X, u8 NN) {
-	if (chip8->registers[X] != NN)
-		chip8->program_counter += 2;
+	if (chip8->registers[X] != NN) skip_next_instruction(chip8);
 }
 
 void op_5XY0(CHIP8* chip8, u8 X, u8 Y) {
-	if (chip8->registers[X] == chip8->registers[Y])
-		chip8->program_counter += 2;
+	if (chip8->registers[X] == chip8->registers[Y]) skip_next_instruction(chip8);
 }
 
 void op_6XNN(CHIP8* chip8, u8 X, u8 NN) {
@@ -124,8 +129,7 @@ void op_8XYE(CHIP8* chip8, u8 X, u8 Y) {
 }
 
 void op_9XY0(CHIP8* chip8, u8 X, u8 Y) {
-	if (chip8->registers[X] != chip8->registers[Y])
-		chip8->program_counter += 2;
+	if (chip8->registers[X] != chip8->registers[Y]) skip_next_instruction(chip8);
 }
 
 void op_ANNN(CHIP8* chip8, u16 NNN) {
@@ -168,13 +172,14 @@ void op_DXYN(CHIP8* chip8, Display* display, u8 X, u8 Y, u8 N) {
 
 void op_EX9E(CHIP8* chip8, u8 X) {
 	if (chip8->keys[chip8->registers[X]] == 1) {
-		chip8->program_counter += 2;
+		skip_next_instruction(chip8);
 	}
 }
 
 void op_EXA1(CHIP8* chip8, u8 X) {
-	if (chip8->keys[chip8->registers[X]] == 0)
-		chip8->program_counter += 2;
+	if (chip8->keys[chip8->registers[X]] == 0) {
+		skip_next_instruction(chip8);
+	}
 }
 
 void op_FX07(CHIP8* chip8, u8 X) {
