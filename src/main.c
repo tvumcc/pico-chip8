@@ -31,7 +31,6 @@
 int main() {
 	buttons_init();
 
-	// Display Stuff
 	tft_height = (uint8_t)131;
 	tft_width = (uint8_t)130;
 	stdio_init_all();

@@ -57,6 +57,7 @@ void chip8_init(CHIP8* chip8, u8* program, size_t program_size) {
 		chip8->stack[i] = 0;
 		chip8->keys[i] = 0;
 		chip8->flags[i] = 0;
+		chip8->audio_pattern_buffer = 0;
 	}
 
 
@@ -66,6 +67,7 @@ void chip8_init(CHIP8* chip8, u8* program, size_t program_size) {
 	chip8->index_register = 0;
 	chip8->delay_timer = 0;
 	chip8->sound_timer = 0;
+	chip8->audio_playback_rate = 4000;
 }
 
 void tick(CHIP8* chip8, Display* display) {
@@ -81,7 +83,7 @@ void timer_tick(CHIP8* chip8) {
 }
 
 u16 fetch_instruction(CHIP8* chip8) {
-	if (chip8->program_counter <= 0xFFF) {
+	if (chip8->program_counter <= 0xFFFF) {
 		unsigned short instruction = (chip8->memory[chip8->program_counter] << 8) | chip8->memory[chip8->program_counter + 1];
 		chip8->program_counter += 2;
 		return instruction;

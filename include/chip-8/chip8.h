@@ -10,7 +10,7 @@ typedef uint32_t u32;
 typedef uint64_t u64;
 
 typedef struct CHIP8 {
-	u8 memory[4096];  // 4 kilobytes of memory, 0x1FF - 0xFFF is where the program/game is stored
+	u8 memory[65535];  // 64 kilobytes of memory
     u8 registers[16]; // 16 8-bit registers, register VF (16) is a special type of register and is generally only used by the interpreter
     u16 stack[16];    // Stores subroutines called by the program
 	u16 keys[16];
@@ -26,6 +26,8 @@ typedef struct CHIP8 {
 	u8 flags[16];
 
 	// XO-CHIP extension
+	u8 audio_pattern_buffer[16];
+	u16 audio_playback_rate;
 } CHIP8;
 
 // Initialize a CHIP8 struct
