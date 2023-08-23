@@ -3,6 +3,7 @@
 #include "chip-8/chip8.h"
 #include "chip-8/chip8_opcodes.h"
 #include "chip-8/schip8_opcodes.h"
+#include "chip-8/xochip_opcodes.h"
 
 void chip8_init(CHIP8* chip8, u8* program, size_t program_size) {
 	u8 fontset[80] = {
@@ -57,7 +58,7 @@ void chip8_init(CHIP8* chip8, u8* program, size_t program_size) {
 		chip8->stack[i] = 0;
 		chip8->keys[i] = 0;
 		chip8->flags[i] = 0;
-		chip8->audio_pattern_buffer = 0;
+		chip8->audio_pattern_buffer[i] = 0;
 	}
 
 
@@ -119,6 +120,10 @@ void decode_and_execute(CHIP8* chip8, Display* display, u16 instruction) {
 				case 0xC8: case 0xC9: case 0xCA: case 0xCB: case 0xCC: case 0xCD: case 0xCE: case 0xCF:
 					op_00CN(display, N);
 					break;
+				case 0xD0: case 0xD1: case 0xD2: case 0xD3: case 0xD4: case 0xD5: case 0xD6: case 0xD7:
+				case 0xD8: case 0xD9: case 0xDA: case 0xDB: case 0xDC: case 0xDD: case 0xDE: case 0xDF:
+					op_00DN(display, N);
+					break;
 				case 0xFB:
 					op_00FB(display);
 					break;
@@ -143,7 +148,17 @@ void decode_and_execute(CHIP8* chip8, Display* display, u16 instruction) {
 			op_4XNN(chip8, X, NN);
 			break;
 		case 0x05:
-			op_5XY0(chip8, X, Y);
+			switch (N) {
+				case 0x00:
+					op_5XY0(chip8, X, Y);
+					break;
+				case 0x02:
+					op_5XY2(chip8, X, Y);
+					break;
+				case 0x03:
+					op_5XY3(chip8, X, Y);
+					break;
+			}
 			break;
 		case 0x06: 
 			op_6XNN(chip8, X, NN);
@@ -213,6 +228,17 @@ void decode_and_execute(CHIP8* chip8, Display* display, u16 instruction) {
 			break;
 		case 0x0f:
 			switch(NN) {
+				case 0x00:
+					if (NNN == 0x000)
+						op_F000NNNN(chip8);
+					break;
+				case 0x01:
+					op_FN01(display, X);
+					break;
+				case 0x02:
+					if (NNN == 0x002) 
+						op_F002(chip8);
+					break;
 				case 0x07:
 					op_FX07(chip8, X);
 					break;
@@ -233,6 +259,9 @@ void decode_and_execute(CHIP8* chip8, Display* display, u16 instruction) {
 					break;
 				case 0x33:
 					op_FX33(chip8, X);
+					break;
+				case 0x3A:
+					op_FX3A(chip8, X);
 					break;
 				case 0x55:
 					op_FX55(chip8, X);

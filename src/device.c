@@ -67,7 +67,10 @@ void rom_select_goto(PicoCHIP8* device) {
 			break;
 		case XO_CHIP:
 			drawText(3, 4, "XO-CHIP", ST7735_WHITE, ST7735_BLACK, 2);
-			drawText(16, 20, "Coming Soon!", ST7735_WHITE, ST7735_BLACK, 1);
+			for (int i = device->page * 8; i < min(sizeof(xochip_roms) / sizeof(Program), (device->page+1) * 8); i++) {
+				drawText(32, 30 + (10 * (i % 8)), xochip_roms[i].name, ST7735_WHITE, ST7735_BLACK, 1);
+			}
+			drawChar(20, 30 + (10 * (device->rom_selection % 8)), '>', ST7735_WHITE, ST7735_BLACK, 1);
 			break;
 	}
 }
@@ -86,6 +89,7 @@ void rom_select_process_buttons(PicoCHIP8* device) {
 			num_roms = sizeof(schip8_roms) / sizeof(Program);
 			break;
 		case XO_CHIP:
+			num_roms = sizeof(xochip_roms) / sizeof(Program);
 			break;
 	}
 
@@ -99,7 +103,7 @@ void rom_select_process_buttons(PicoCHIP8* device) {
 		}
 		drawChar(20, 30 + (device->rom_selection % 8) * 10, '>', ST7735_WHITE, ST7735_BLACK, 1);
 		debounce_timer = to_ms_since_boot(get_absolute_time());
-		// Move cursor down
+	// Move cursor down
 	} else if (device->key_state[KEY_8] && (to_ms_since_boot(get_absolute_time()) > debounce_timer + debounce)) {
 		fillRect(20, 30 + (device->rom_selection % 8) * 10, 5, 7, ST7735_BLACK);
 		device->rom_selection = (device->rom_selection + 1) % (num_roms);
@@ -109,16 +113,21 @@ void rom_select_process_buttons(PicoCHIP8* device) {
 		}
 		drawChar(20, 30 + (device->rom_selection % 8) * 10, '>', ST7735_WHITE, ST7735_BLACK, 1);
 		debounce_timer = to_ms_since_boot(get_absolute_time());
-		// Select
+	// Select
 	} else if (device->key_state[KEY_9] && (to_ms_since_boot(get_absolute_time()) > debounce_timer + debounce)) {
 		device->state = STATE_GAME;
-		display = display_init();
 		switch (device->system) {
 			case CHIP_8:
+				display = display_init(ST7735_BLACK, ST7735_WHITE, ST7735_BLACK, ST7735_BLACK);
 				chip8_init(&chip8, chip8_roms[device->rom_selection].data, chip8_roms[device->rom_selection].size);
 				break;
 			case SuperCHIP_8:
+				display = display_init(ST7735_BLACK, ST7735_WHITE, ST7735_BLACK, ST7735_BLACK);
 				chip8_init(&chip8, schip8_roms[device->rom_selection].data, schip8_roms[device->rom_selection].size);
+				break;
+			case XO_CHIP:
+				display = display_init(ST7735_BLACK, ST7735_WHITE, ST7735_GREEN, ST7735_CYAN);
+				chip8_init(&chip8, xochip_roms[device->rom_selection].data, xochip_roms[device->rom_selection].size);
 				break;
 			default:
 				break;

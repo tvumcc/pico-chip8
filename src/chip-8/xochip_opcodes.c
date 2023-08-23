@@ -1,3 +1,5 @@
+#include <math.h>
+
 #include "chip-8/xochip_opcodes.h"
 
 void op_00DN(Display* display, u8 N) {
@@ -33,7 +35,8 @@ void op_F000NNNN(CHIP8* chip8) {
 }
 
 void op_FN01(Display* display, u8 X) {
-	for (int i = 0; i < 8; i++) display->bitplane_mask |= ((X & (i/4 + 1)) << i)
+	display->bitplane_mask = X & 1 ? display->bitplane_mask | 0x0F : display->bitplane_mask & 0xF0;
+	display->bitplane_mask = X & 2 ? display->bitplane_mask | 0xF0 : display->bitplane_mask & 0x0F;
 }
 
 void op_F002(CHIP8* chip8) {
@@ -43,5 +46,5 @@ void op_F002(CHIP8* chip8) {
 }
 
 void op_FX3A(CHIP8* chip8, u8 X) {
-	chip8->audio_playback_rate = (u16)floor(4000.0d * (pow(2.0d, ((double)chip8 - 64.0d) / 48.0d)))
+	chip8->audio_playback_rate = (u16)floor(4000.0d * (pow(2.0d, ((double)chip8->registers[X] - 64.0d) / 48.0d)));
 }
