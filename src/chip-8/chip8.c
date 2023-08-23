@@ -2,8 +2,6 @@
 
 #include "chip-8/chip8.h"
 #include "chip-8/chip8_opcodes.h"
-#include "chip-8/schip8_opcodes.h"
-#include "chip-8/xochip_opcodes.h"
 
 void chip8_init(CHIP8* chip8, u8* program, size_t program_size) {
 	u8 fontset[80] = {
@@ -25,26 +23,14 @@ void chip8_init(CHIP8* chip8, u8* program, size_t program_size) {
 		0xF0, 0x80, 0xF0, 0x80, 0x80, // F
 	};
 
-
 	// Initialize memory to 0
 	for (int i = 0; i < 4096; i++) {
 		// Load the first 80 bytes with the fontset
 		if (i < 80) {
 			chip8->memory[i] = fontset[i];
-		} else if (i < 512) { // Reserved memory has to have some sort of data (needed for roms such as Binding of Cosmac)
+		} else if (i < 512) {
 			chip8->memory[i] = (u8)(rand() % 256);
 		}
-
-	}
-
-	// Big hex font
-	for (int k = 0, i = 80; k < 80; i+=2, k++) {
-		u8 out = 0;
-		for (int j = 0; j < 4; j++) {
-			out |= ((chip8->memory[k] & (1 << (j+4))) ? (3 << (j * 2)) : (0));
-		}
-		chip8->memory[i] = out;
-		chip8->memory[i+1] = out;
 	}
 
 	// Load program into memory
@@ -57,10 +43,7 @@ void chip8_init(CHIP8* chip8, u8* program, size_t program_size) {
 		chip8->registers[i] = 0;
 		chip8->stack[i] = 0;
 		chip8->keys[i] = 0;
-		chip8->flags[i] = 0;
-		chip8->audio_pattern_buffer[i] = 0;
 	}
-
 
 	// Initialize the rest of the values
 	chip8->stack_count = 0;
@@ -68,7 +51,6 @@ void chip8_init(CHIP8* chip8, u8* program, size_t program_size) {
 	chip8->index_register = 0;
 	chip8->delay_timer = 0;
 	chip8->sound_timer = 0;
-	chip8->audio_playback_rate = 4000;
 }
 
 void tick(CHIP8* chip8, Display* display) {
@@ -77,14 +59,12 @@ void tick(CHIP8* chip8, Display* display) {
 }
 
 void timer_tick(CHIP8* chip8) {
-	if (chip8->sound_timer > 0)	
-		chip8->sound_timer--;
-	if (chip8->delay_timer > 0)
-		chip8->delay_timer--;
+	if (chip8->sound_timer > 0)	chip8->sound_timer--;
+	if (chip8->delay_timer > 0) chip8->delay_timer--;
 }
 
 u16 fetch_instruction(CHIP8* chip8) {
-	if (chip8->program_counter <= 0xFFFF) {
+	if (chip8->program_counter <= 0xFFF) {
 		unsigned short instruction = (chip8->memory[chip8->program_counter] << 8) | chip8->memory[chip8->program_counter + 1];
 		chip8->program_counter += 2;
 		return instruction;
@@ -110,29 +90,6 @@ void decode_and_execute(CHIP8* chip8, Display* display, u16 instruction) {
 				case 0xEE:
 					op_00EE(chip8);
 					break;
-				case 0xFF:
-					op_00FF(display);
-					break;
-				case 0xFE:
-					op_00FE(display);
-					break;
-				case 0xC0: case 0xC1: case 0xC2: case 0xC3: case 0xC4: case 0xC5: case 0xC6: case 0xC7:
-				case 0xC8: case 0xC9: case 0xCA: case 0xCB: case 0xCC: case 0xCD: case 0xCE: case 0xCF:
-					op_00CN(display, N);
-					break;
-				case 0xD0: case 0xD1: case 0xD2: case 0xD3: case 0xD4: case 0xD5: case 0xD6: case 0xD7:
-				case 0xD8: case 0xD9: case 0xDA: case 0xDB: case 0xDC: case 0xDD: case 0xDE: case 0xDF:
-					op_00DN(display, N);
-					break;
-				case 0xFB:
-					op_00FB(display);
-					break;
-				case 0xFC:
-					op_00FC(display);
-					break;
-				case 0xFD:
-					op_00FD();
-					break;
 			}
 			break;
 		case 0x01:
@@ -148,17 +105,7 @@ void decode_and_execute(CHIP8* chip8, Display* display, u16 instruction) {
 			op_4XNN(chip8, X, NN);
 			break;
 		case 0x05:
-			switch (N) {
-				case 0x00:
-					op_5XY0(chip8, X, Y);
-					break;
-				case 0x02:
-					op_5XY2(chip8, X, Y);
-					break;
-				case 0x03:
-					op_5XY3(chip8, X, Y);
-					break;
-			}
+			op_5XY0(chip8, X, Y);
 			break;
 		case 0x06: 
 			op_6XNN(chip8, X, NN);
@@ -210,11 +157,7 @@ void decode_and_execute(CHIP8* chip8, Display* display, u16 instruction) {
 			op_CXNN(chip8, X, NN);
 			break;	
 		case 0x0d:
-			if (N == 0) {
-				op_DXY0(chip8, display, X, Y);
-			} else {
-				op_DXYN(chip8, display, X, Y, N);
-			}
+			op_DXYN(chip8, display, X, Y, N);
 			break;
 		case 0x0e:
 			switch(NN) {
@@ -228,17 +171,6 @@ void decode_and_execute(CHIP8* chip8, Display* display, u16 instruction) {
 			break;
 		case 0x0f:
 			switch(NN) {
-				case 0x00:
-					if (NNN == 0x000)
-						op_F000NNNN(chip8);
-					break;
-				case 0x01:
-					op_FN01(display, X);
-					break;
-				case 0x02:
-					if (NNN == 0x002) 
-						op_F002(chip8);
-					break;
 				case 0x07:
 					op_FX07(chip8, X);
 					break;
@@ -260,20 +192,11 @@ void decode_and_execute(CHIP8* chip8, Display* display, u16 instruction) {
 				case 0x33:
 					op_FX33(chip8, X);
 					break;
-				case 0x3A:
-					op_FX3A(chip8, X);
-					break;
 				case 0x55:
 					op_FX55(chip8, X);
 					break;
 				case 0x65:
 					op_FX65(chip8, X);
-					break;
-				case 0x75:
-					op_FX75(chip8, X);
-					break;
-				case 0x85:
-					op_FX85(chip8, X);
 					break;
 			}
 			break;

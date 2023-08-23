@@ -9,8 +9,6 @@ typedef struct Program {
 } Program;
 
 extern Program chip8_roms[14];
-extern Program schip8_roms[3];
-extern Program xochip_roms[1];
 
 extern unsigned char ibm_program[132];
 extern unsigned char octojam2_program[1240];
@@ -26,10 +24,4 @@ extern unsigned char corax_program[697];
 extern unsigned char flags_program[1017];
 extern unsigned char quirks_program[3232];
 extern unsigned char keypad_program[913];
-
-extern unsigned char sine_program[282];
-extern unsigned char binding_program[3552];
-extern unsigned char snake_program[1438];
-
-extern unsigned char octopaint_program[236];
 #endif

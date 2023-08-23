@@ -6,7 +6,6 @@
 #include "ST7735_TFT.h"
 
 #include "roms.h"
-#include "system.h"
 #include "device.h"
 #include "display.h"
 #include "button.h"
@@ -48,22 +47,20 @@ int main() {
 	unsigned int clock_60hz = 17;
 	srand(last_frame); 
 
-	device.state = STATE_HOME;
-	device.system_selection = 0;
+	device.state = STATE_ROM_SELECT;
 	device.rom_selection = 0;
 	device.page = 0;
-	device.system = CHIP_8;
-	home_goto(&device);
+	rom_select_goto(&device);
 
 	while (true) {
 		process_buttons(device.key_state);
+		unsigned int current_time = to_ms_since_boot(get_absolute_time());
 
-		if (device.key_state[KEY_RESET] && device.key_state[KEY_1] && device.state != STATE_HOME) {
-			home_goto(&device);
+		if (device.key_state[KEY_RESET] && device.key_state[KEY_1] && device.state != STATE_ROM_SELECT) {
+			rom_select_goto(&device);
 		} else {
 			switch (device.state) {
-				case STATE_GAME: {
-					unsigned int current_time = to_ms_since_boot(get_absolute_time());
+				case STATE_GAME:
 					if (current_time > last_frame_60hz + clock_60hz) {
 						timer_tick(&chip8);
 						last_frame_60hz = current_time;
@@ -73,9 +70,6 @@ int main() {
 						tick(&chip8, &display);
 						last_frame = current_time;
 					}
-				} break;
-				case STATE_HOME:
-					home_process_buttons(&device);
 					break;
 				case STATE_ROM_SELECT:
 					rom_select_process_buttons(&device);

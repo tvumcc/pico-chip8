@@ -146,19 +146,15 @@ void op_CXNN(CHIP8* chip8, u8 X, u8 NN) {
 
 void op_DXYN(CHIP8* chip8, Display* display, u8 X, u8 Y, u8 N) {
 	chip8->registers[15] = 0;
-
-	int screen_height = display->extended_resolution ? SUPER_CHIP8_HEIGHT : CHIP8_HEIGHT;
-	int screen_width = display->extended_resolution ? SUPER_CHIP8_WIDTH : CHIP8_WIDTH;
-
-	int y_pos = chip8->registers[Y] % screen_height;
+	int y_pos = chip8->registers[Y] % CHIP8_HEIGHT;
 
 	for (u8 i = 0; i < N; i++) {
-		if (y_pos >= screen_height) break;
-		int x_pos = chip8->registers[X] % screen_width;
+		if (y_pos >= CHIP8_HEIGHT) break;
+		int x_pos = chip8->registers[X] % CHIP8_WIDTH;
 		u8 row = chip8->memory[chip8->index_register + i];
 
 		for (int j = 7; j >= 0; j--) {
-			if (x_pos >= screen_width) break;
+			if (x_pos >= CHIP8_WIDTH) break;
 			if (row & (1 << j)) // Check if the bit needed is set to 1, if so draw it
 				if (display_set_pixel(display, x_pos, y_pos))
 					chip8->registers[15] = 1;
@@ -167,6 +163,7 @@ void op_DXYN(CHIP8* chip8, Display* display, u8 X, u8 Y, u8 N) {
 
 		y_pos++;
 	}
+
 	display_draw(display);
 }
 

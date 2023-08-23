@@ -5,7 +5,6 @@
 #include "display.h"
 #include "chip8.h"
 
-
 // Documentation comments from https://en.wikipedia.org/wiki/CHIP-8
 
 // Clears the screen
