@@ -21,7 +21,6 @@
 #define KEY_0 13
 #define KEY_B 14
 #define KEY_F 15
-#define KEY_RESET 16  // Reset button is at GPIO pin 2
 
 // GPIO pins for shift registers
 #define SHIFT_LOAD 20

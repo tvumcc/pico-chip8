@@ -56,7 +56,7 @@ int main() {
 		process_buttons(device.key_state);
 		unsigned int current_time = to_ms_since_boot(get_absolute_time());
 
-		if (device.key_state[KEY_RESET] && device.key_state[KEY_1] && device.state != STATE_ROM_SELECT) {
+		if (device.key_state[KEY_F] && device.key_state[KEY_1] && device.state != STATE_ROM_SELECT) {
 			rom_select_goto(&device);
 		} else {
 			switch (device.state) {

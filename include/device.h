@@ -9,7 +9,7 @@
 #define STATE_GAME 2
 
 typedef struct PicoCHIP8 {
-	u8 key_state[17]; // button 16 is for RESET
+	u8 key_state[16]; // button 16 is for RESET
 	u8 state;
 
 	// Menu Stuff

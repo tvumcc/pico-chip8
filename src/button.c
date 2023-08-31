@@ -28,6 +28,5 @@ void process_buttons(unsigned char* out) {
 		gpio_put(SHIFT_CLK, 0);
 		sleep_us(1);
 	}
-	out[16] = (unsigned char)gpio_get(2);
 	gpio_put(SHIFT_LOAD, 0);
 }
