@@ -5,7 +5,7 @@
 
 #include "display.h"
 
-Display display_init(unsigned short bg, unsigned short fg) {
+Display display_init(uint16_t bg, uint16_t fg) {
     Display display;
 	display.bg_color = bg;
 	display.fg_color = fg;
@@ -18,7 +18,7 @@ void display_draw(Display* display) {
 	for (int y = 0; y < CHIP8_HEIGHT; y++) {
 		for (int x = 0; x < CHIP8_WIDTH; x++) {
 			if (display->prev_buffer[y][x] != display->pixelArray[y][x]) {
-				unsigned short color = display->pixelArray[y][x] == 0xFF ? display->fg_color : display->bg_color;
+				uint16_t color = display->pixelArray[y][x] == 0xFF ? display->fg_color : display->bg_color;
 				fillRect(x*2+1, y*2+32, 2, 2, color);
 			}
 			display->prev_buffer[y][x] = display->pixelArray[y][x];

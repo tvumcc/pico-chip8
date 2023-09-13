@@ -1,5 +1,7 @@
 #ifndef DEVICE_H
 #define DEVICE_H
+#include <stdint.h>
+
 #include "display.h"
 #include "button.h"
 
@@ -9,12 +11,12 @@
 #define STATE_GAME 2
 
 typedef struct PicoCHIP8 {
-	u8 key_state[16]; // button 16 is for RESET
-	u8 state;
+	uint8_t key_state[16]; // button 16 is for RESET
+	uint8_t state;
 
 	// Menu Stuff
-	u8 rom_selection;
-	u8 page;
+	uint8_t rom_selection;
+	uint8_t page;
 } PicoCHIP8;
 
 extern PicoCHIP8 device;

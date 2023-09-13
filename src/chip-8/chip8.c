@@ -3,8 +3,8 @@
 #include "chip-8/chip8.h"
 #include "chip-8/chip8_opcodes.h"
 
-void chip8_init(CHIP8* chip8, u8* program, size_t program_size) {
-	u8 fontset[80] = {
+void chip8_init(CHIP8* chip8, uint8_t* program, size_t program_size) {
+	uint8_t fontset[80] = {
 		0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
 		0x20, 0x60, 0x20, 0x20, 0x70, // 1
 		0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
@@ -29,7 +29,7 @@ void chip8_init(CHIP8* chip8, u8* program, size_t program_size) {
 		if (i < 80) {
 			chip8->memory[i] = fontset[i];
 		} else if (i < 512) {
-			chip8->memory[i] = (u8)(rand() % 256);
+			chip8->memory[i] = (uint8_t)(rand() % 256);
 		}
 	}
 
@@ -54,7 +54,7 @@ void chip8_init(CHIP8* chip8, u8* program, size_t program_size) {
 }
 
 void tick(CHIP8* chip8, Display* display) {
-	u16 instruction = fetch_instruction(chip8);
+	uint16_t instruction = fetch_instruction(chip8);
 	decode_and_execute(chip8, display, instruction);
 }
 
@@ -63,7 +63,7 @@ void timer_tick(CHIP8* chip8) {
 	if (chip8->delay_timer > 0) chip8->delay_timer--;
 }
 
-u16 fetch_instruction(CHIP8* chip8) {
+uint16_t fetch_instruction(CHIP8* chip8) {
 	if (chip8->program_counter <= 0xFFF) {
 		unsigned short instruction = (chip8->memory[chip8->program_counter] << 8) | chip8->memory[chip8->program_counter + 1];
 		chip8->program_counter += 2;
@@ -73,13 +73,13 @@ u16 fetch_instruction(CHIP8* chip8) {
 	}
 }
 
-void decode_and_execute(CHIP8* chip8, Display* display, u16 instruction) {
+void decode_and_execute(CHIP8* chip8, Display* display, uint16_t instruction) {
 	// Possible Arguments
-	u8 X   = (instruction & 0x0F00) >> 8;
-	u8 Y   = (instruction & 0x00F0) >> 4;
-	u8 N   = (instruction & 0x000F);
-	u8 NN  = (instruction & 0x00FF);
-	u16 NNN = (instruction & 0x0FFF);
+	uint8_t X   = (instruction & 0x0F00) >> 8;
+	uint8_t Y   = (instruction & 0x00F0) >> 4;
+	uint8_t N   = (instruction & 0x000F);
+	uint8_t NN  = (instruction & 0x00FF);
+	uint16_t NNN = (instruction & 0x0FFF);
 		
 	switch((instruction & 0xF000) >> 12) {
 		case 0x00:

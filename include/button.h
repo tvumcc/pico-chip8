@@ -1,5 +1,6 @@
 #ifndef BUTTON_H
 #define BUTTON_H
+#include <stdint.h>
 
 // Row 1
 #define KEY_1 0
@@ -33,5 +34,5 @@ extern int keys[16];
 void buttons_init();
 
 // Loads in the inputs from the shift register into memory
-void process_buttons(unsigned char* out);
+void process_buttons(uint8_t* out);
 #endif
