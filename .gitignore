@@ -1,4 +1,5 @@
 build
+roms
+
 roms.c
 roms.h
-roms

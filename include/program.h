@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 typedef struct Program {
-	char name[17];
+	char name[16];
 	uint8_t* data;
 	size_t size;
 } Program;
