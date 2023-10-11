@@ -21,13 +21,13 @@ for filename in listdir("./roms"):
 
             # Write the binary data into a C array
             roms_c_out += f"unsigned char rom{counter}[{len(bytes)}] = " + "{"
-            roms_c_out += ''.join(hex(byte) + "," for byte in bytes)
+            roms_c_out += ','.join(hex(byte) for byte in bytes)
             roms_c_out += "};\n"
     counter += 1
 
 roms_h_out += f"extern Program chip8_roms[{len(programs)}];"
 roms_c_out += f"Program chip8_roms[{len(programs)}] = " + "{\n"
-roms_c_out += ''.join("\t{" + f"{program.name}, {program.identifier}, {program.size}" + "},\n")
+roms_c_out += ',\n'.join("\t{" + f"{program.name}, {program.identifier}, {program.size}" + "}" for program in programs)
 roms_c_out += "};\n"
 
 # write roms_c_out and roms_f_out
