@@ -7,16 +7,16 @@ class Program:
         self.identifier = i
         self.size = s
 
-roms_c_out = """#include \"roms.h\"\n")"""
-roms_h_out = """#include \"program.h\"\n")"""
+roms_c_out = """#include \"roms.h\"\n"""
+roms_h_out = """#include \"program.h\"\n"""
 
 programs = []
 
 counter = 0  # counts how many programs there are
 
-for filename in os.listdir("./roms"):
-    file_path = os.path.join("./roms", filename)
-    if os.path.isfile(file_path):
+for filename in listdir("./roms"):
+    file_path = path.join("./roms", filename)
+    if path.isfile(file_path):
         
         with open(file_path, "rb") as bin_file:
             bytes = bin_file.read()
@@ -33,7 +33,7 @@ for filename in os.listdir("./roms"):
 roms_h_out += f"extern Program chip8_roms[{len(programs)}];"
 roms_c_out += f"Program chip8_roms[{len(programs)}] = " + "{\n"
 
-roms_c_out += ["\t{" + f"{program.name}, {program.identifier}, {program.size}" + "},\n" for program in programs]
+for program in programs: roms_c_out += "\t{" + f"{program.name}, {program.identifier}, {program.size}" + "},\n"
 roms_c_out += "};\n"
 
 # write roms_c_out and roms_f_out
