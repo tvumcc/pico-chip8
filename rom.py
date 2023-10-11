@@ -9,15 +9,11 @@ class Program:
 
 roms_c_out = """#include \"roms.h\"\n"""
 roms_h_out = """#include \"program.h\"\n"""
-
 programs = []
-
 counter = 0  # counts how many programs there are
 
 for filename in listdir("./roms"):
-    file_path = path.join("./roms", filename)
-    if path.isfile(file_path):
-        
+    if path.isfile(file_path := path.join("./roms", filename)):
         with open(file_path, "rb") as bin_file:
             bytes = bin_file.read()
             roms_h_out += f"extern unsigned char rom{counter}[{len(bytes)}];\n"
@@ -33,7 +29,8 @@ for filename in listdir("./roms"):
 roms_h_out += f"extern Program chip8_roms[{len(programs)}];"
 roms_c_out += f"Program chip8_roms[{len(programs)}] = " + "{\n"
 
-for program in programs: roms_c_out += "\t{" + f"{program.name}, {program.identifier}, {program.size}" + "},\n"
+for program in programs:
+    roms_c_out += "\t{" + f"{program.name}, {program.identifier}, {program.size}" + "},\n"
 roms_c_out += "};\n"
 
 # write roms_c_out and roms_f_out
